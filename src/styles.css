@@ -1608,6 +1608,12 @@ sub {
 	color: var(--hot);
 }
 
+/*
+ * Only the transform is animated. Fading in and out of the keyframes would put
+ * the resting state at half opacity, and under reduced motion the animation
+ * stops on that resting state: the readers who get the least motion would get
+ * the faintest label, next to a pulse ring that has also been stopped.
+ */
 .ladder-nudge {
 	font-family: var(--mono);
 	font-style: normal;
@@ -1615,6 +1621,7 @@ sub {
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
 	color: var(--muted);
+	opacity: 0.85;
 	animation: nudge 1.9s ease-in-out infinite;
 }
 
@@ -1622,11 +1629,9 @@ sub {
 	0%,
 	100% {
 		transform: translateX(0);
-		opacity: 0.45;
 	}
 	50% {
 		transform: translateX(5px);
-		opacity: 1;
 	}
 }
 
