@@ -54,7 +54,7 @@ Worth being explicit about, because this is a teaching aid.
 
 - **Real.** The separative work function `V(x) = (2x − 1)·ln(x/(1 − x))` and the feed/tails mass balance, in `src/lib/separation.ts`. At 4.5 % product with 0.25 % tails it returns ~6.9 SWU and ~9.2 kg feed per kg product, matching published tables. The Graham's law separation factor of 1.0043 is computed from real UF₆ molar masses.
 - **Directionally real, magnitude exaggerated.** Centrifuge separation. Heavy really does go to the wall and light really does concentrate toward the axis, with a counter-current between the ends, but a single machine shifts the assay by a fraction of a percent, which would be invisible. The honest numbers are in the readout.
-- **Illustrative only.** The chain reaction models branching and nothing else. No cross-sections, no moderation, no geometry, no delayed neutrons. It shows the logic that enrichment controls, not a neutronics result.
+- **Illustrative only.** The chain reaction models branching and nothing else. No cross-sections, no moderation, no geometry, no delayed neutrons. It shows the logic that enrichment controls, not a neutronics result. The neutron interaction radius is a tuned visualisation parameter, not a cross-section: it applies to both isotopes identically, so it cannot tilt the outcome toward either, and it exists because in a lattice only 7 sites across, neutrons threading between sites and leaking out was drowning the assay signal the scene is built to show.
 - **Assay basis.** 0.72 % is the atom-percent figure. On a mass basis natural uranium is 0.711 %, which is what SWU tables conventionally use, so the effort figures here run a few percent low against published values.
 
 ## Stack
@@ -62,8 +62,24 @@ Worth being explicit about, because this is a teaching aid.
 - **Vite + React 19 + TypeScript**
 - **[@react-three/fiber](https://github.com/pmndrs/react-three-fiber)** — React renderer for three.js
 - **[@react-three/drei](https://github.com/pmndrs/drei)** — `OrbitControls`, plus `Environment`/`Lightformer` for a locally generated environment map, so the page fetches nothing from a CDN at runtime
+- **[@react-three/postprocessing](https://github.com/pmndrs/react-postprocessing)** — selective bloom and vignette, shared by both canvases (`src/three/Effects.tsx`)
 - **zustand** — stage and assay state
 - **three.js** — instanced meshes throughout; the fission lattice, ore specks, atom crowd and centrifuge gas are each a single draw call
+
+### The glow convention
+
+Worth knowing before editing any scene, because bloom here is semantic rather than decorative. Only **fissile material, free neutrons, UV fluorescence, indicator lamps and the HEU state** are allowed to glow. Rock and machinery never do.
+
+Bloom triggers on luminance above 1.0, which means:
+
+| To make something glow | Use |
+|---|---|
+| A single material | `toneMapped={false}` and `emissiveIntensity > 1` |
+| Per-instance, on an `instancedMesh` | HDR instance colours: `MeshBasicMaterial` with `toneMapped={false}` and `setColorAt` given a colour multiplied past 1.0 |
+
+The second row is the trap. `material.emissive` is one colour for the whole instanced mesh, so setting `emissiveIntensity` on an instanced material does not give individual instances a glow — and setting it with no `emissive` colour emits nothing at all. Several scenes originally had exactly that bug.
+
+`C.hot` is reserved for one meaning: the assay has crossed the 20% HEU line. It appears nowhere else.
 
 The journey uses ordinary DOM scrolling with a fixed canvas behind it rather than `ScrollControls`, so the chapter text stays styleable CSS and the scenes swap on whichever section owns the middle of the viewport.
 
@@ -95,7 +111,11 @@ Then set Pages source to "GitHub Actions" in repository settings. After that, ev
 
 ## Accessibility
 
-Keyboard navigable, visible focus rings, `prefers-reduced-motion` respected (animation stops, scenes stay readable), and the layout reflows to a single column on narrow screens.
+Keyboard navigable with visible focus rings, and the layout reflows to a single column on narrow screens.
+
+`prefers-reduced-motion` is honoured throughout: every scene renders a legible still, the journey canvas drops to an on-demand frameloop, and programmatic scrolls jump rather than glide. The fission stage is the one place where the run still advances — freezing it left the readout stuck on one neutron and the verdict reading "Propagating." forever, so the physics and counters run while the neutrons themselves stay parked. You get the result without the motion.
+
+Fission flashes ramp in rather than switching on at full brightness, because at weapons assay dozens overlap per second and stacked instantaneous onsets are a strobe.
 
 ## Sources
 
