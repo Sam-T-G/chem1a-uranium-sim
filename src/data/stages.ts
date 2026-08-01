@@ -70,7 +70,7 @@ export const STAGES: Record<StageId, StageInfo> = {
 		title: "Conversion to UF_{6}",
 		lede: "Enrichment needs a gas, and only one uranium compound will do.",
 		body: [
-			"Yellowcake is reduced to uranium dioxide, treated with hydrogen fluoride to give uranium tetrafluoride, then fluorinated to uranium hexafluoride.[[cite:wna-cycle]]",
+			"Yellowcake is reduced to uranium dioxide, treated with hydrogen fluoride to give uranium tetrafluoride, then fluorinated to uranium hexafluoride.[[cite:wna-conversion]]",
 			"UF_{6} is the only uranium compound that becomes a gas at a workable temperature. It sublimes rather than melting at atmospheric pressure, and it reacts violently with water, which is a large part of why enrichment plants are difficult industrial facilities.",
 			"Fluorine is doing a second job here. It is monoisotopic: every fluorine atom is F-19. So the entire mass difference between the two UF_{6} molecules comes from the uranium, and none of it is smeared out by fluorine isotopes. With any other halogen the separation would be blunted.",
 		],

@@ -109,7 +109,7 @@ export const CHAPTERS: Chapter[] = [
 		kicker: "1943 – 1945",
 		heading: "Separating it at Oak Ridge",
 		body: [
-			"To use a mass difference you put the uranium into gas form and let the lighter molecules move slightly faster. That needs a uranium compound that is a gas at a workable temperature, and there is only one: uranium hexafluoride.[[cite:wna-cycle]]",
+			"To use a mass difference you put the uranium into gas form and let the lighter molecules move slightly faster. That needs a uranium compound that is a gas at a workable temperature, and there is only one: uranium hexafluoride.[[cite:wna-conversion]]",
 			"Fluorine helps because it has a single isotope. The whole mass difference between the two UF_{6} molecules comes from the uranium, and nothing blurs it.",
 			"Push UF_{6} through a porous barrier and the lighter molecules get through slightly faster. Graham's law gives the ratio, and it works out to about four tenths of one percent per pass. Getting from 0.72% to weapons grade means repeating that thousands of times.[[cite:fas-separation]][[cite:openstax]]",
 			"So in 1943 the US built K-25 in Tennessee to do exactly that. Three plants ran in series: S-50 took the assay to about 0.9%, K-25 carried it further, and Y-12 finished it at around 90%.[[cite:nps-oakridge]] K-25 was, on completion, the largest building in the world by floor area, and around 75,000 people lived in a city that did not appear on maps.",
