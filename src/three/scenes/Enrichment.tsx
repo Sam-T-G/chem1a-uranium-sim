@@ -9,7 +9,7 @@ const ROTOR_R = 1.15;
 const ROTOR_H = 5.4;
 
 // Hoisted so the per-frame loops never allocate. Instanced meshes share one
-// material, so per-instance glow has to ride in the instance colour itself:
+// material, so per-instance glow has to ride in the instance color itself:
 // values pushed past 1.0 on an untone-mapped basic material cross the bloom
 // threshold, values under 1.0 never do. U-235 and lit machines glow; U-238
 // and idle machines stay dark.
@@ -22,7 +22,7 @@ const COL_OFF = new THREE.Color("#39435A");
 /**
  * Cutaway gas centrifuge.
  *
- * The radial behaviour is real in direction: at 50,000-70,000 rpm the heavier
+ * The radial behavior is real in direction: at 50,000-70,000 rpm the heavier
  * U-238 bearing molecules are driven toward the rotor wall and the lighter
  * U-235 bearing molecules sit relatively closer to the axis, and an imposed
  * counter-current carries wall gas down and axial gas up so the two ends of the
@@ -225,7 +225,7 @@ function Streams({ assay, reduced }: { assay: number; reduced: boolean }) {
 
 	return (
 		<>
-			{/* Basic material: the instance colour is the emitted light, HDR or not. */}
+			{/* Basic material: the instance color is the emitted light, HDR or not. */}
 			<instancedMesh ref={productRef} args={[undefined, undefined, N]} frustumCulled={false}>
 				<sphereGeometry args={[1, 7, 7]} />
 				<meshBasicMaterial toneMapped={false} />
@@ -285,8 +285,8 @@ function Cascade({ assay }: { assay: number }) {
 		<instancedMesh ref={ref} args={[undefined, undefined, N]} frustumCulled={false}>
 			<capsuleGeometry args={[0.16, 1.15, 4, 10]} />
 			{/*
-				Basic, untone-mapped: lit machines carry HDR instance colours and
-				bloom through the fog; idle machines sit at a flat dark blue-grey.
+				Basic, untone-mapped: lit machines carry HDR instance colors and
+				bloom through the fog; idle machines sit at a flat dark blue-gray.
 			*/}
 			<meshBasicMaterial toneMapped={false} />
 		</instancedMesh>

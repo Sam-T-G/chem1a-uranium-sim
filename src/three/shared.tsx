@@ -102,7 +102,7 @@ export function Floor({ y = -3.2 }: { y?: number }) {
 	);
 }
 
-/** Emissive material tuned for the isotope colours. */
+/** Emissive material tuned for the isotope colors. */
 export function useIsotopeMaterials() {
 	return useMemo(
 		() => ({

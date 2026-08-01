@@ -7,7 +7,7 @@ import { Lighting } from "../shared";
 /**
  * Two UF6 molecules, side by side. Identical octahedral geometry, identical
  * bonding, identical chemistry. The only difference is three neutrons in the
- * centre, worth 1.3 % of the molecular mass. That difference is the sole reason
+ * center, worth 1.3 % of the molecular mass. That difference is the sole reason
  * enrichment is possible and the sole reason it is difficult.
  */
 
@@ -69,7 +69,7 @@ function UF6({
 
 	return (
 		<group ref={g} position={position} rotation={BASE_ROT}>
-			{/* Uranium centre. The colour and the glow are the only differences the
+			{/* Uranium center. The color and the glow are the only differences the
 			    two molecules are allowed: everything a centrifuge can grab is the
 			    same on both sides. */}
 			<mesh>
@@ -85,7 +85,7 @@ function UF6({
 			</mesh>
 
 			{/* Electron-cloud hint. Not an orbital, not to scale: a faint shell of
-			    the centre's colour so the molecule occupies volume, not just points. */}
+			    the center's color so the molecule occupies volume, not just points. */}
 			<mesh>
 				<sphereGeometry args={[1.85, 32, 32]} />
 				<meshBasicMaterial

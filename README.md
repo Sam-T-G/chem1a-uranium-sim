@@ -11,8 +11,8 @@ A scroll-through explainer that ends inside a working simulation of the fuel cyc
 | | Chapter | Scene |
 |---|---|---|
 | — | Uranium | Ore turning under a moving rim light |
-| 01 | Mostly it was used to colour glass | Uranium glass flaring green as a UV lamp sweeps past |
-| 02 | It is named after a planet | Pitchblende, and Uranus behind it |
+| 01 | Glassmakers used it as a pigment | Uranium glass flaring green as a UV lamp sweeps past |
+| 02 | Klaproth named it after a planet | Pitchblende, and Uranus behind it |
 | 03 | The barium result | A nucleus stretching, pinching and splitting, on a loop |
 | 04 | Only 0.72% of it is usable | A thousand atoms drifting; seven are U-235 |
 | 05 | Separating it at Oak Ridge | A separation hall running out past the fog |
@@ -41,15 +41,15 @@ The argument the whole thing is built around: **U-235 and U-238 are chemically i
 
 The log-scaled axis on the right of the canvas is present on every stage and never moves. It marks 0.25 % tails, 0.72 % natural, 5 % reactor fuel, the 20 % IAEA HEU line, and 90 % weapons-grade. Everything else in the simulation is downstream of where that marker sits.
 
-Cross the 20 % line and the interface turns vermilion. That colour appears nowhere else.
+Cross the 20 % line and the interface turns vermilion. That color appears nowhere else.
 
 ### The two interactive stages
 
 **Stage 04** sets the target assay. The readout gives feed, tails and separative work per kilogram of product, and the cascade behind the rotor lights in proportion to the work required. Raising the target from 4.5 % to 60 % lights most of the hall; the last stretch to 90 % adds comparatively little. That asymmetry is the reason enrichment ceilings sit where they do in negotiated agreements.
 
-**Stage 06** builds a nucleus lattice at whatever assay stage 04 left behind, then induces one fission at the centre. At 0.72 % the released neutrons are captured by U-238 and the chain dies in a generation or two. At 90 % nearly every neutron finds another U-235. Same lattice, same rules, one variable.
+**Stage 06** builds a nucleus lattice at whatever assay stage 04 left behind, then induces one fission at the center. At 0.72 % the released neutrons are captured by U-238 and the chain dies in a generation or two. At 90 % nearly every neutron finds another U-235. Same lattice, same rules, one variable.
 
-## What is modelled and what is not
+## What is modeled and what is not
 
 Worth being explicit about, because this is a teaching aid.
 
@@ -77,15 +77,15 @@ Bloom triggers on luminance above 1.0, which means:
 | To make something glow | Use |
 |---|---|
 | A single material | `toneMapped={false}` and `emissiveIntensity > 1` |
-| Per-instance, on an `instancedMesh` | HDR instance colours: `MeshBasicMaterial` with `toneMapped={false}` and `setColorAt` given a colour multiplied past 1.0 |
+| Per-instance, on an `instancedMesh` | HDR instance colors: `MeshBasicMaterial` with `toneMapped={false}` and `setColorAt` given a color multiplied past 1.0 |
 
-The second row is the trap. `material.emissive` is one colour for the whole instanced mesh, so setting `emissiveIntensity` on an instanced material does not give individual instances a glow — and setting it with no `emissive` colour emits nothing at all. Several scenes originally had exactly that bug.
+The second row is the trap. `material.emissive` is one color for the whole instanced mesh, so setting `emissiveIntensity` on an instanced material does not give individual instances a glow — and setting it with no `emissive` color emits nothing at all. Several scenes originally had exactly that bug.
 
 `C.hot` is reserved for one meaning: the assay has crossed the 20% HEU line. It appears nowhere else.
 
 The journey uses ordinary DOM scrolling with a fixed canvas behind it rather than `ScrollControls`, so the chapter text stays styleable CSS and the scenes swap on whichever section owns the middle of the viewport.
 
-No rigid-body physics engine. Rapier or cannon model collisions between solids, which is not what either simulation here needs: centrifugal isotope separation is a drift-and-counter-current problem, and a chain reaction is neutron transport with branching. Both are written directly against the behaviour being shown, in `src/three/scenes/Enrichment.tsx` and `src/three/scenes/Fission.tsx`.
+No rigid-body physics engine. Rapier or cannon model collisions between solids, which is not what either simulation here needs: centrifugal isotope separation is a drift-and-counter-current problem, and a chain reaction is neutron transport with branching. Both are written directly against the behavior being shown, in `src/three/scenes/Enrichment.tsx` and `src/three/scenes/Fission.tsx`.
 
 ## Running it
 

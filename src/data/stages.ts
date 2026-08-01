@@ -134,7 +134,7 @@ export const STAGES: Record<StageId, StageInfo> = {
 		body: [
 			"A slow neutron absorbed by U-235 pushes the nucleus past its fission barrier. It splits into two lighter fragments and releases two or three more neutrons.[[cite:openstax]] If more than one of those goes on to cause another fission, the reaction sustains itself.",
 			"U-238 will not do this with slow neutrons. U-235 has an odd neutron count, so absorbing a neutron pairs it up and the pairing energy alone clears the barrier. U-238 has an even count, gets no pairing bonus, and needs a fast neutron. In a thermal reactor those neutrons have been moderated away, so U-238 mostly just absorbs and becomes plutonium-239.[[cite:openstax]]",
-			"Each fission releases roughly 200 MeV. A chemical bond releases a few electronvolts. The ratio is about a hundred million to one, and that is the entire reason a 0.72% isotopic accident reorganised twentieth-century politics.[[cite:aps-fission]]",
+			"Each fission releases roughly 200 MeV. A chemical bond releases a few electronvolts. The ratio is about a hundred million to one, and that is the entire reason a 0.72% isotopic accident reorganized twentieth-century politics.[[cite:aps-fission]]",
 		],
 		equation: "^{235}U + n  →  ^{141}Ba + ^{92}Kr + 3n + ~200 MeV",
 		equationLabel:

@@ -23,7 +23,7 @@ const NEUTRON = new THREE.Color("#8FA6C4");
 const FREE_N = new THREE.Color(C.neutron);
 
 // Trail behind the incoming neutron: a short ring buffer of recent positions.
-// HDR instance colour past 1.0 so the head of the trail catches bloom.
+// HDR instance color past 1.0 so the head of the trail catches bloom.
 const TRAIL_N = 7;
 const TRAIL_DT = 0.045; // seconds between samples; ~1.2 world units of trail
 const TRAIL_HDR = new THREE.Color(C.neutron).multiplyScalar(1.6);
@@ -149,7 +149,7 @@ export default function BerlinScene({ reduced }: { reduced: boolean }) {
 		}
 		mesh.current.instanceMatrix.needsUpdate = true;
 
-		// Nucleon identity never changes, so its colours are written once rather
+		// Nucleon identity never changes, so its colors are written once rather
 		// than re-uploaded 150 at a time every frame.
 		if (!nucleonsTinted.current) {
 			for (let i = 0; i < N_NUCLEONS; i++) {

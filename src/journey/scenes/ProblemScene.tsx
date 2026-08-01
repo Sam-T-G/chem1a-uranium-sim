@@ -9,7 +9,7 @@ import { dummy, isU235, mulberry32 } from "../../three/shared";
  *
  * 1,000 atoms, so seven of them are U-235. The camera sits inside the crowd and
  * the scarcity is the whole image: you have to look for the green ones, which
- * is exactly the problem. The seven carry HDR instance colours so the bloom
+ * is exactly the problem. The seven carry HDR instance colors so the bloom
  * pass lifts them; the other 993 stay dull, unlit, and slightly uneven so the
  * crowd still has depth without a single light in the scene.
  */
@@ -18,7 +18,7 @@ const N = 1000;
 const COL_U235 = new THREE.Color(C.u235);
 
 // Shared pulse for the seven light atoms and their halos. Recomputed once per
-// frame into this hoisted colour; never allocated in useFrame.
+// frame into this hoisted color; never allocated in useFrame.
 const pulsed = new THREE.Color();
 const PULSE_SPEED = 0.8; // rad/s — a slow breath, ~8 s period
 const HDR_MID = 2.4; // mid-pulse multiplier; bloom threshold is 1.0
@@ -52,7 +52,7 @@ export default function ProblemScene({ reduced }: { reduced: boolean }) {
 				light,
 				// U-238 varies 0.10–0.15 so the crowd feels organic, not stamped.
 				scale: light ? 0.26 : 0.1 + scaleJit * 0.05,
-				// Unlit flat colour reads flat; per-atom darkening stands in for
+				// Unlit flat color reads flat; per-atom darkening stands in for
 				// the shading the old lit material provided.
 				shade: new THREE.Color(C.u238).multiplyScalar(light ? 1 : shadeMul),
 			};
@@ -94,7 +94,7 @@ export default function ProblemScene({ reduced }: { reduced: boolean }) {
 				dummy.scale.setScalar(a.scale);
 				dummy.updateMatrix();
 				m.setMatrixAt(i, dummy.matrix);
-				// Heavy-atom colours are static; write them on the first full
+				// Heavy-atom colors are static; write them on the first full
 				// pass only. The seven light ones are refreshed below.
 				if (firstPass) m.setColorAt(i, a.shade);
 			}
@@ -127,7 +127,7 @@ export default function ProblemScene({ reduced }: { reduced: boolean }) {
 					frustumCulled={false}
 				>
 					<icosahedronGeometry args={[1, 1]} />
-					{/* Basic + toneMapped false so per-instance HDR colours pass
+					{/* Basic + toneMapped false so per-instance HDR colors pass
 					    straight through to the bloom threshold test. */}
 					<meshBasicMaterial toneMapped={false} />
 				</instancedMesh>

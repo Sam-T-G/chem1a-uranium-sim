@@ -18,7 +18,7 @@ export function EnrichmentControls() {
 	const setAssay = useSim((s) => s.setAssay);
 	const heu = assay >= ASSAY.haleu;
 
-	// Log slider: most of the interesting behaviour lives below 20 %.
+	// Log slider: most of the interesting behavior lives below 20 %.
 	const sliderValue = ((Math.log(assay) - LO) / (HI - LO)) * 1000;
 	const cost = separationCost(assay);
 
@@ -175,7 +175,7 @@ export function FissionControls({
 			<p className="note">{verdict}</p>
 
 			<p className="note">
-				The run starts by inducing one fission at the centre. What the assay decides
+				The run starts by inducing one fission at the center. What the assay decides
 				is whether that fission propagates. Go back to <strong>stage 04</strong>,
 				change the assay, and run this again: at 0.72% the released neutrons are
 				captured by U-238 within a generation or two, and at 90% almost every one
@@ -184,7 +184,7 @@ export function FissionControls({
 			</p>
 
 			<p className="note">
-				Branching only. Cross-sections, moderation and geometry are not modelled, so
+				Branching only. Cross-sections, moderation and geometry are not modeled, so
 				treat this as a diagram of the logic rather than a neutronics result.
 			</p>
 		</div>

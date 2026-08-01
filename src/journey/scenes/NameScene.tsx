@@ -27,7 +27,7 @@ function Pitchblende({ reduced }: { reduced: boolean }) {
 		g.current.position.y = -1.7 + Math.sin(state.clock.elapsedTime * 0.6) * 0.08;
 	});
 
-	// Sits low-centre-right so the chapter card never covers it.
+	// Sits low-center-right so the chapter card never covers it.
 	return (
 		<group ref={g} position={[1.7, -1.7, 2.2]}>
 			<mesh>
@@ -201,7 +201,7 @@ function Starfield({ reduced }: { reduced: boolean }) {
 	return (
 		<instancedMesh ref={ref} args={[undefined, undefined, STAR_N]} frustumCulled={false}>
 			<sphereGeometry args={[1, 6, 6]} />
-			{/* Instance colours carry the tint; below 1.0 so the sky never blooms. */}
+			{/* Instance colors carry the tint; below 1.0 so the sky never blooms. */}
 			<meshBasicMaterial color="#FFFFFF" toneMapped={false} />
 		</instancedMesh>
 	);

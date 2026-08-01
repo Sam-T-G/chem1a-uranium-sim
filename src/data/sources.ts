@@ -213,7 +213,7 @@ export const SOURCES: Source[] = [
 		year: "2021",
 		url: "https://armscontrolcenter.org/uranium-enrichment-for-peace-or-for-weapons/",
 		kind: "institutional",
-		note: "The 20% LEU/HEU dividing line, the 3–5% commercial band and the ~90% weapons-grade figure, explained for a general reader. A policy advocacy organisation, so its framing is not neutral even where its numbers are standard.",
+		note: "The 20% LEU/HEU dividing line, the 3–5% commercial band and the ~90% weapons-grade figure, explained for a general reader. A policy advocacy organization, so its framing is not neutral even where its numbers are standard.",
 	},
 	{
 		id: "veritasium",

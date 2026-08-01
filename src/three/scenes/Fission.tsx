@@ -14,7 +14,7 @@ import { Lighting, dummy, isU235 } from "../shared";
  * absorbed by U-238 within a few generations and the reaction dies. At reactor
  * assay it just sustains. At weapons assay it runs away.
  *
- * Geometry, cross-sections and moderation are not modelled. This shows the
+ * Geometry, cross-sections and moderation are not modeled. This shows the
  * branching logic that enrichment controls, not a neutronics calculation.
  */
 
@@ -32,7 +32,7 @@ const MAX_NEUTRONS = 900;
 const MAX_FLASH = 64;
 const FLASH_LIFE = 0.45;
 
-// The nuclei draw with an unlit material and HDR instance colours, so glow is
+// The nuclei draw with an unlit material and HDR instance colors, so glow is
 // per-instance: live U-235 sits past 1.0 and blooms softly, live U-238 stays
 // LDR and matte, and spent sites drop to near-background so the burn front
 // reads as the lattice going dark behind the flashes.
@@ -112,7 +112,7 @@ export default function Fission({
 		flashHead.current = 0;
 
 		if (firing) {
-			// Seed on the fissile site nearest the centre so the run always begins
+			// Seed on the fissile site nearest the center so the run always begins
 			// with one induced fission. Otherwise the outcome would turn on whether
 			// a single arbitrary lattice site happened to be U-235, which says
 			// nothing about the assay. What the assay decides is whether that first
@@ -273,7 +273,7 @@ export default function Fission({
 
 		// --- draw fission flashes ---------------------------------------------
 		// Each flash is a short-lived expanding sphere, additive so fading the
-		// colour to black fades the flash out. The peak is deliberately modest
+		// color to black fades the flash out. The peak is deliberately modest
 		// and ramped in over ~0.1s rather than switched on: at weapons assay
 		// dozens overlap per second, and instantaneous full-brightness onsets
 		// stacking like that is exactly the strobing pattern to avoid.
@@ -315,9 +315,9 @@ export default function Fission({
 			>
 				<icosahedronGeometry args={[1, 1]} />
 				{/*
-					Unlit on purpose: instanced materials share one emissive colour,
-					so per-instance glow has to live in the instance colours. HDR
-					colours past 1.0 bloom; the rest stay flat.
+					Unlit on purpose: instanced materials share one emissive color,
+					so per-instance glow has to live in the instance colors. HDR
+					colors past 1.0 bloom; the rest stay flat.
 				*/}
 				<meshBasicMaterial toneMapped={false} />
 			</instancedMesh>

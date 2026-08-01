@@ -7,7 +7,7 @@ import { Floor, Lighting, dummy, mulberry32 } from "../shared";
 /**
  * Crush, leach, precipitate. Ore chunks enter on the left, uranium is taken into
  * solution, and yellowcake accumulates in the drum on the right. The isotope
- * ratio is untouched here, so nothing in this scene is colour-coded by isotope:
+ * ratio is untouched here, so nothing in this scene is color-coded by isotope:
  * everything downstream of the mill is uranium at natural abundance.
  */
 
@@ -288,7 +288,7 @@ export default function Milling({ reduced }: { reduced: boolean }) {
 		<>
 			<Lighting />
 			<Floor y={-2.4} />
-			{/* Line runs -7.5 to +4.5, so shift right to sit centred in frame. */}
+			{/* Line runs -7.5 to +4.5, so shift right to sit centered in frame. */}
 			<group position={[0.4, -0.4, 0]}>
 				<Conveyor reduced={reduced} />
 				<Dust reduced={reduced} />

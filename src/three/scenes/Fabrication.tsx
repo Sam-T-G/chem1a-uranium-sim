@@ -14,7 +14,7 @@ const PELLET_H = 0.5;
 
 /**
  * Pellets are a pale sintered ceramic. The fissile fraction is shown by tinting
- * that ceramic toward the U-235 colour, so the same encoding used everywhere
+ * that ceramic toward the U-235 color, so the same encoding used everywhere
  * else still applies without pretending real pellets glow green. The scale
  * factor pushes high-assay tints past 1.0 so the bloom pass picks them up:
  * near-natural stacks stay matte, high-assay stacks carry a faint halo. That
@@ -29,7 +29,7 @@ function pelletColor(assay: number): THREE.Color {
 
 /**
  * Per-pellet brightness variance. Basic materials ignore lighting, so without
- * this every pellet in a stack is the identical flat colour and the stack reads
+ * this every pellet in a stack is the identical flat color and the stack reads
  * as one extrusion. Sintered ceramic genuinely varies batch to batch.
  */
 function pelletTints(assay: number, n: number, seed: number): THREE.Color[] {
@@ -40,7 +40,7 @@ function pelletTints(assay: number, n: number, seed: number): THREE.Color[] {
 	);
 }
 
-/** Pellets travelling down the line and stacking into the rod. */
+/** Pellets traveling down the line and stacking into the rod. */
 function Line({ assay, reduced }: { assay: number; reduced: boolean }) {
 	const ref = useRef<THREE.InstancedMesh>(null);
 	// Five across 4.4 units, so pellets read as discrete objects rather than a
@@ -52,7 +52,7 @@ function Line({ assay, reduced }: { assay: number; reduced: boolean }) {
 	);
 	const tints = useMemo(() => pelletTints(assay, N, 4242), [assay]);
 
-	// Colours and the initial (reduced-mode) placement are set once here;
+	// Colors and the initial (reduced-mode) placement are set once here;
 	// useFrame only rewrites matrices, so nothing allocates per frame.
 	useLayoutEffect(() => {
 		if (!ref.current) return;
@@ -88,7 +88,7 @@ function Line({ assay, reduced }: { assay: number; reduced: boolean }) {
 				<boxGeometry args={[4.8, 0.12, 1.0]} />
 				<meshStandardMaterial color="#2E3441" metalness={0.5} roughness={0.7} />
 			</mesh>
-			{/* Basic material: instance colours pass through unlit, so HDR tints
+			{/* Basic material: instance colors pass through unlit, so HDR tints
 			    survive to the bloom pass instead of being flattened by shading. */}
 			<instancedMesh ref={ref} args={[undefined, undefined, N]} frustumCulled={false}>
 				<cylinderGeometry args={[PELLET_R, PELLET_R, PELLET_H, 24]} />

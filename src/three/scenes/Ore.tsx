@@ -168,7 +168,7 @@ function Rubble() {
 			dummy.scale.setScalar(0.12 + rnd() * 0.3);
 			dummy.updateMatrix();
 			ref.current.setMatrixAt(i, dummy.matrix);
-			// Slight grey variation (0.85–1.15 around the base colour) so the ring
+			// Slight gray variation (0.85–1.15 around the base color) so the ring
 			// reads as forty stones rather than one repeated mesh.
 			col.setScalar(0.85 + tint() * 0.3);
 			ref.current.setColorAt(i, col);

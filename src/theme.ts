@@ -1,5 +1,5 @@
 /**
- * Palette. The two isotope colours are semantic and are used identically in the
+ * Palette. The two isotope colors are semantic and are used identically in the
  * 3D scenes and in the UI: if it is chartreuse it is U-235, if it is dull amber
  * it is U-238. Vermilion is reserved for one thing only, crossing the 20 % HEU
  * threshold, so its appearance always means the same thing.
@@ -13,7 +13,7 @@ export const C = {
 	muted: "#8A93A6",
 
 	u235: "#C8F03C", // uranyl fluorescence green — the light, fissile isotope
-	u238: "#7A6A52", // dull heavy amber-grey — the abundant, fertile isotope
+	u238: "#7A6A52", // dull heavy amber-gray — the abundant, fertile isotope
 	cake: "#E8A33D", // yellowcake amber — process equipment and flow
 	hot: "#FF4D3D", // vermilion — HEU threshold only
 	neutron: "#7FD8FF", // cold blue — free neutrons

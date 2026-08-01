@@ -41,10 +41,10 @@ export const CHAPTERS: Chapter[] = [
 		index: "01",
 		short: "Pigment",
 		kicker: "79 CE – 1930s",
-		heading: "Mostly it was used to colour glass",
+		heading: "Glassmakers used it as a pigment",
 		body: [
 			"Miners in Bohemia hit uranium ore while digging for silver. They called it pitchblende, roughly \"bad luck rock\", because finding it meant the silver had run out. It went on the waste pile.[[cite:strahan]]",
-			"It turned out to be good for one thing. Ground up and stirred into molten glass it gave a yellow-green colour that was hard to get any other way. Glassmakers were doing this from the late Middle Ages, and a piece of yellow glass from a Roman villa near Naples, dated to around 79 CE, contains about 1% uranium oxide.[[cite:strahan]]",
+			"It turned out to be good for one thing. Ground up and stirred into molten glass it gave a yellow-green color that was hard to get any other way. Glassmakers were doing this from the late Middle Ages, and a piece of yellow glass from a Roman villa near Naples, dated to around 79 CE, contains about 1% uranium oxide.[[cite:strahan]]",
 			"That stayed uranium's main job for centuries: glass, glazes, and orange dinner plates.[[cite:orau-fiesta]]",
 			"The glow you see under UV light is ordinary chemistry rather than radioactivity. The uranyl ion absorbs ultraviolet and re-emits green. People still collect the glass.[[cite:strahan]]",
 		],
@@ -55,7 +55,7 @@ export const CHAPTERS: Chapter[] = [
 		index: "02",
 		short: "The name",
 		kicker: "1789 – 1896",
-		heading: "It is named after a planet",
+		heading: "Klaproth named it after a planet",
 		body: [
 			"In 1789 a Berlin chemist called Martin Heinrich Klaproth dissolved pitchblende in acid and got a yellow compound that matched nothing known. He had found a new element.[[cite:britannica-klaproth]]",
 			"He named it after Uranus, which William Herschel had spotted eight years earlier. The name has nothing to do with the element. The planet was just recent news.",

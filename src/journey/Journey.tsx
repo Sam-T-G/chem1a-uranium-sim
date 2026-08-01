@@ -86,7 +86,7 @@ export default function Journey() {
 		return () => el.removeEventListener("scroll", onScroll);
 	}, []);
 
-	// Reveal cards once, as they approach the viewport centre.
+	// Reveal cards once, as they approach the viewport center.
 	useEffect(() => {
 		const obs = new IntersectionObserver(
 			(entries) => {

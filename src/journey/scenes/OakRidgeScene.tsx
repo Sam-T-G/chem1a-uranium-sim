@@ -115,7 +115,7 @@ export default function OakRidgeScene({ reduced }: { reduced: boolean }) {
 					<meshStandardMaterial color="#8996AE" metalness={0.8} roughness={0.35} />
 				</instancedMesh>
 
-				{/* Indicator lamps, the only warm colour in the hall */}
+				{/* Indicator lamps, the only warm color in the hall */}
 				<instancedMesh
 					ref={glow}
 					args={[undefined, undefined, N]}
@@ -167,7 +167,7 @@ export default function OakRidgeScene({ reduced }: { reduced: boolean }) {
 					blending={THREE.AdditiveBlending}
 					depthWrite={false}
 					// Sits far beyond fogFar, so without this it resolves to fog
-					// colour and the vanishing-point glow never renders at all.
+					// color and the vanishing-point glow never renders at all.
 					fog={false}
 				/>
 			</mesh>
