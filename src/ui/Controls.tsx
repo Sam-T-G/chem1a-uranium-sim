@@ -179,8 +179,7 @@ export function FissionControls({
 				is whether that fission propagates. Go back to <strong>stage 04</strong>,
 				change the assay, and run this again: at 0.72% the released neutrons are
 				captured by U-238 within a generation or two, and at 90% almost every one
-				finds another U-235. That comparison is the argument for why enrichment
-				exists.
+				finds another U-235.
 			</p>
 
 			<p className="note">
