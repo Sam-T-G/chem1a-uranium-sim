@@ -20,9 +20,16 @@ export const STAGE_ORDER: StageId[] = [
 
 export type Mode = "journey" | "sim";
 
+/**
+ * Render tier, moved automatically by AdaptiveQuality from measured frame
+ * times. Scenes and effects read it to shed work on slower machines.
+ */
+export type Quality = "high" | "medium" | "low";
+
 interface SimState {
 	/** The narrative runs first; the simulation is where it lands. */
 	mode: Mode;
+	quality: Quality;
 	stage: StageId;
 	/** Product assay as a mass fraction of U-235. Only the enrichment stage changes it. */
 	assay: number;
@@ -33,6 +40,7 @@ interface SimState {
 	reducedMotion: boolean;
 
 	setMode: (m: Mode) => void;
+	setQuality: (q: Quality) => void;
 	setStage: (s: StageId) => void;
 	next: () => void;
 	prev: () => void;
@@ -45,6 +53,7 @@ interface SimState {
 
 export const useSim = create<SimState>((set, get) => ({
 	mode: "journey",
+	quality: "high",
 	stage: "ore",
 	assay: ASSAY.natural,
 	spinning: true,
@@ -52,6 +61,7 @@ export const useSim = create<SimState>((set, get) => ({
 	reducedMotion: false,
 
 	setMode: (mode) => set({ mode }),
+	setQuality: (quality) => set({ quality }),
 	setStage: (stage) => set({ stage, firing: false }),
 	next: () => {
 		const i = STAGE_ORDER.indexOf(get().stage);

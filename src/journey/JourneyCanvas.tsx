@@ -4,6 +4,8 @@ import * as THREE from "three";
 
 import type { ChapterId } from "./chapters";
 import Effects from "../three/Effects";
+import AdaptiveQuality from "../three/AdaptiveQuality";
+import { DPR } from "../theme";
 import IntroScene from "./scenes/IntroScene";
 import GlassScene from "./scenes/GlassScene";
 import NameScene from "./scenes/NameScene";
@@ -27,6 +29,7 @@ const VIEWS: Record<ChapterId, [number, number, number]> = {
 	oakridge: [0, 4.2, 20],
 	line: [3.4, 1.1, 11.5],
 	handoff: [0, 2.2, 8.4],
+	sources: [0, 2.2, 9.6],
 };
 
 function Scene({ id, reduced }: { id: ChapterId; reduced: boolean }) {
@@ -46,6 +49,7 @@ function Scene({ id, reduced }: { id: ChapterId; reduced: boolean }) {
 		case "line":
 			return <LineScene reduced={reduced} />;
 		case "handoff":
+		case "sources":
 			return <Ore reduced={reduced} />;
 	}
 }
@@ -89,7 +93,7 @@ export default function JourneyCanvas({
 }) {
 	return (
 		<Canvas
-			dpr={[1, 2]}
+			dpr={DPR}
 			camera={{ position: VIEWS.intro, fov: 42 }}
 			// Anti-aliasing comes from the composer's multisampling; asking the
 			// default framebuffer for it too allocates and resolves a second MSAA
@@ -118,6 +122,7 @@ export default function JourneyCanvas({
 			</Suspense>
 			<CameraRig chapter={chapter} reduced={reduced} />
 			<Effects />
+			<AdaptiveQuality />
 		</Canvas>
 	);
 }

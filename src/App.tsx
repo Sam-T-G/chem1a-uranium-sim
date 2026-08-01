@@ -3,7 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
-import { ASSAY, C } from "./theme";
+import { ASSAY, C, DPR } from "./theme";
 import { STAGES } from "./data/stages";
 import { assayAtStage, STAGE_ORDER, useSim, type StageId } from "./store";
 
@@ -19,6 +19,10 @@ import ProcessRail from "./ui/ProcessRail";
 import { EnrichmentControls, FissionControls } from "./ui/Controls";
 import Journey from "./journey/Journey";
 import Effects from "./three/Effects";
+import AdaptiveQuality from "./three/AdaptiveQuality";
+import { inline } from "./ui/Cite";
+import { Equation, sci } from "./ui/Sci";
+import WorksCited from "./ui/WorksCited";
 
 /**
  * Boot veil over the first paint: the monogram holds while fonts and the GL
@@ -44,7 +48,7 @@ function Boot() {
 				<sup>235</sup>U
 			</div>
 			<div className="boot-line" />
-			<div className="boot-label">The rock nobody wanted</div>
+			<div className="boot-label">An element report</div>
 		</div>
 	);
 }
@@ -68,8 +72,8 @@ const LEGENDS: Partial<Record<StageId, { dot: string; text: string }[]>> = {
 		{ dot: C.u238, text: "U-238 · everything else" },
 	],
 	conversion: [
-		{ dot: C.u235, text: "²³⁵UF₆ · 349.03 g/mol" },
-		{ dot: C.u238, text: "²³⁸UF₆ · 352.04 g/mol" },
+		{ dot: C.u235, text: "^{235}UF_{6} · 349.03 g/mol" },
+		{ dot: C.u238, text: "^{238}UF_{6} · 352.04 g/mol" },
 	],
 	enrichment: [
 		{ dot: C.u235, text: "U-235 · drifts toward the axis" },
@@ -218,7 +222,7 @@ function Simulation() {
 					<sup>235</sup>U — the fuel cycle
 				</div>
 				<div className="head-sub">
-					stage {STAGE_ORDER.indexOf(stage) + 1} of {STAGE_ORDER.length} · {info.title}
+					stage {STAGE_ORDER.indexOf(stage) + 1} of {STAGE_ORDER.length} · {sci(info.title, `${stage}-head`)}
 				</div>
 				<div className="head-spacer" />
 				<AssayChip assay={shownAssay} />
@@ -227,7 +231,7 @@ function Simulation() {
 			<div className="stage-area">
 				<div className="canvas-wrap">
 					<Canvas
-						dpr={[1, 2]}
+						dpr={DPR}
 						camera={{ position: VIEWS[stage].pos, fov: 42 }}
 						// The composer's multisampling is the only anti-aliasing that
 						// reaches the image; a second MSAA default framebuffer would be
@@ -239,6 +243,7 @@ function Simulation() {
 						<Suspense fallback={null}>{scene}</Suspense>
 						<CameraRig stage={stage} />
 						<Effects />
+						<AdaptiveQuality />
 					</Canvas>
 
 					{/* Dissolve on stage change, matching the journey's cuts. */}
@@ -248,7 +253,7 @@ function Simulation() {
 						<div className="legend">
 							{legend.map((l) => (
 								<i key={l.text} style={{ "--dot": l.dot } as React.CSSProperties}>
-									{l.text}
+									{sci(l.text, l.text)}
 								</i>
 							))}
 						</div>
@@ -269,19 +274,21 @@ function Simulation() {
 						<b>{info.index}</b>
 						<span>{info.label}</span>
 					</div>
-					<h1 className="panel-title">{info.title}</h1>
-					<p className="panel-lede">{info.lede}</p>
+					<h1 className="panel-title">{sci(info.title, `${stage}-title`)}</h1>
+					<p className="panel-lede">{inline(info.lede, `${stage}-lede`)}</p>
 
 					<div className="panel-body">
-						{info.body.map((p) => (
-							<p key={p.slice(0, 24)}>{p}</p>
+						{info.body.map((p, i) => (
+							<p key={p.slice(0, 24)}>{inline(p, `${stage}-${i}`)}</p>
 						))}
 					</div>
 
 					{info.equation && (
 						<div className="eqn">
-							<code>{info.equation}</code>
-							{info.equationNote && <small>{info.equationNote}</small>}
+							<Equation label={info.equationLabel}>{info.equation}</Equation>
+							{info.equationNote && (
+								<small>{inline(info.equationNote, `${stage}-eqn`)}</small>
+							)}
 						</div>
 					)}
 
@@ -290,9 +297,9 @@ function Simulation() {
 
 					{info.figure && (
 						<div className="figure">
-							<span className="figure-value">{info.figure.value}</span>
+							<span className="figure-value">{sci(info.figure.value, `${stage}-fig`)}</span>
 							<span className="figure-unit">{info.figure.unit}</span>
-							<p className="figure-caption">{info.figure.caption}</p>
+							<p className="figure-caption">{inline(info.figure.caption, `${stage}-cap`)}</p>
 						</div>
 					)}
 
@@ -302,6 +309,11 @@ function Simulation() {
 							stage. Nothing before enrichment changes the isotope ratio.
 						</p>
 					)}
+
+					<details className="panel-sources">
+						<summary>Works cited</summary>
+						<WorksCited />
+					</details>
 					</div>
 				</aside>
 			</div>

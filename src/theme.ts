@@ -31,3 +31,15 @@ export const ASSAY = {
 	haleu: 0.2, // IAEA LEU/HEU dividing line
 	weapons: 0.9, // conventionally "weapons-grade"
 } as const;
+
+/**
+ * Device pixel ratio ceiling. Retina phones report 3, which on top of the
+ * bloom chain and (in the glass chapter) a transmission pre-pass means a
+ * buffer nine times the CSS area. Coarse pointers get a lower cap; the bloom
+ * is a blur, so the loss is invisible and the frame budget is not.
+ */
+export const DPR: [number, number] =
+	typeof window !== "undefined" &&
+	window.matchMedia("(pointer: coarse)").matches
+		? [1, 1.5]
+		: [1, 2];

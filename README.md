@@ -1,23 +1,24 @@
-# The rock nobody wanted
+# Uranium
 
-A scroll-through story about uranium that ends inside a working simulation of the fuel cycle. Written for a Chem 1A element report.
+A scroll-through explainer that ends inside a working simulation of the fuel cycle. Written for a Chem 1A element report.
 
 **Live: https://sam-t-g.github.io/chem1a-uranium-sim/**
 
 ## Two halves
 
-**The journey** opens the page: eight scroll chapters, each with its own three.js scene, covering how an element that spent eighteen centuries as a glass pigment became the thing treaties are written about.
+**The journey** opens the page: nine scroll chapters, each with its own three.js scene, covering how an element that spent eighteen centuries as a glass pigment became the thing treaties are written about.
 
 | | Chapter | Scene |
 |---|---|---|
-| — | The rock nobody wanted | Ore turning under a moving rim light |
-| 01 | For eighteen centuries it was just a pigment | Uranium glass flaring green as a UV lamp sweeps past |
-| 02 | Named after a planet, by a man who never held it | Pitchblende, and Uranus behind it |
-| 03 | Barium, where barium could not possibly be | A nucleus stretching, pinching and splitting, on a loop |
-| 04 | Only one atom in 139 is any use | A thousand atoms drifting; seven are U-235 |
-| 05 | So they built the largest building in the world | A separation hall running out past the fog |
+| — | Uranium | Ore turning under a moving rim light |
+| 01 | Mostly it was used to colour glass | Uranium glass flaring green as a UV lamp sweeps past |
+| 02 | It is named after a planet | Pitchblende, and Uranus behind it |
+| 03 | The barium result | A nucleus stretching, pinching and splitting, on a loop |
+| 04 | Only 0.72% of it is usable | A thousand atoms drifting; seven are U-235 |
+| 05 | Separating it at Oak Ridge | A separation hall running out past the fog |
 | 06 | The same machine makes both | The assay scale climbing through the 20 % line |
-| — | Now run it yourself | Stage 01 of the simulation, already on screen |
+| — | The simulation | Stage 01 of the simulation, already on screen |
+| — | Sources | The annotated bibliography |
 
 The last chapter's scene *is* the simulation's first scene at the same camera, so pressing **Enter the simulation** changes the interface without cutting away from the image. A back arrow in the simulation header returns to the story.
 
@@ -29,12 +30,12 @@ Six stages, navigable from the rail at the bottom or with the ← → arrow keys
 |---|---|---|
 | 01 | Ore | Uraninite with its uranium atoms drawn at true natural abundance: ten U-235 among 1,390 U-238 |
 | 02 | Mill | Crush, acid leach, solvent extraction, yellowcake. Chemical separation only, isotope ratio untouched |
-| 03 | Convert | Two UF₆ molecules side by side. Identical octahedral geometry, 1.3 % apart in mass |
+| 03 | Convert | Two UF₆ molecules side by side. Identical octahedral geometry, 0.86% apart in mass |
 | 04 | Enrich | A cutaway gas centrifuge, plus the cascade behind it growing with the separative work you demand |
 | 05 | Fuel | Pellets pressed, sintered, stacked, clad in zircaloy |
 | 06 | Fission | A lattice at your chosen assay. Fire a neutron and watch whether the chain survives |
 
-The argument the whole thing is built around: **U-235 and U-238 are chemically identical, so nothing in ordinary chemistry separates them.** The only handle is a 1.3 % mass difference, and the cost of exploiting it is what turned an isotopic accident into an object of international law.
+The argument the whole thing is built around: **U-235 and U-238 are chemically identical, so nothing in ordinary chemistry separates them.** The only handle is a 1.3% difference between the isotopes themselves (0.86% once they are inside UF₆), and the cost of exploiting it is what turned an isotopic accident into an object of international law.
 
 ### The assay ladder
 
@@ -55,7 +56,8 @@ Worth being explicit about, because this is a teaching aid.
 - **Real.** The separative work function `V(x) = (2x − 1)·ln(x/(1 − x))` and the feed/tails mass balance, in `src/lib/separation.ts`. At 4.5 % product with 0.25 % tails it returns ~6.9 SWU and ~9.2 kg feed per kg product, matching published tables. The Graham's law separation factor of 1.0043 is computed from real UF₆ molar masses.
 - **Directionally real, magnitude exaggerated.** Centrifuge separation. Heavy really does go to the wall and light really does concentrate toward the axis, with a counter-current between the ends, but a single machine shifts the assay by a fraction of a percent, which would be invisible. The honest numbers are in the readout.
 - **Illustrative only.** The chain reaction models branching and nothing else. No cross-sections, no moderation, no geometry, no delayed neutrons. It shows the logic that enrichment controls, not a neutronics result. The neutron interaction radius is a tuned visualisation parameter, not a cross-section: it applies to both isotopes identically, so it cannot tilt the outcome toward either, and it exists because in a lattice only 7 sites across, neutrons threading between sites and leaking out was drowning the assay signal the scene is built to show.
-- **Assay basis.** 0.72 % is the atom-percent figure. On a mass basis natural uranium is 0.711 %, which is what SWU tables conventionally use, so the effort figures here run a few percent low against published values.
+- **Adaptive.** `src/three/AdaptiveQuality.tsx` samples real frame times and moves the renderer between three tiers, dropping pixel ratio first and then bloom. It reads a rolling median rather than a mean, uses a wide dead band between the step-down and step-up thresholds, and requires a long run of good frames before recovering, so the tier cannot flicker.
+- **Assay basis.** 0.72% is the atom-percent figure. On a mass basis natural uranium is 0.711 %, which is what SWU tables conventionally use, so the effort figures here run a few percent low against published values.
 
 ## Stack
 

@@ -76,9 +76,6 @@ body::after {
 	position: fixed;
 	inset: 0;
 	z-index: 200;
-	/* Decorative and aria-hidden, so it must never swallow a click — least of
-	   all during the 700ms fade when the page already looks interactive. */
-	pointer-events: none;
 	display: grid;
 	place-content: center;
 	justify-items: center;
@@ -90,6 +87,8 @@ body::after {
 .boot.is-fading {
 	opacity: 0;
 	visibility: hidden;
+	/* Opaque hold still blocks input; the moment it starts fading it must not. */
+	pointer-events: none;
 }
 
 .boot-mark {
@@ -170,6 +169,350 @@ body::after {
 	to {
 		opacity: 0;
 	}
+}
+
+/* ═════════════════════  scientific typography  ════════════════════ */
+
+/*
+ * Sub- and superscripts are real elements, so they inherit the surrounding
+ * face instead of triggering a font substitution mid-formula. The browser
+ * default for <sub>/<sup> uses `vertical-align: sub|super` plus `smaller`,
+ * which shifts the line box and makes formulas sit unevenly in running text.
+ * Positioning them relatively keeps the line box intact.
+ */
+sub,
+sup {
+	font-size: 0.68em;
+	line-height: 0;
+	position: relative;
+	vertical-align: baseline;
+	font-variant-numeric: tabular-nums lining-nums;
+	font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+sup {
+	top: -0.52em;
+}
+
+sub {
+	bottom: -0.22em;
+}
+
+/* Inline formula in running prose. */
+.sci {
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Radical: the bar has to span the radicand, which needs a border, not a glyph. */
+.sci-radical {
+	display: inline-flex;
+	align-items: flex-start;
+	white-space: nowrap;
+}
+
+.sci-radix {
+	margin-right: -0.06em;
+	transform: scaleY(1.12);
+	transform-origin: center;
+}
+
+.sci-radicand {
+	border-top: 1px solid currentColor;
+	padding: 0.12em 0.16em 0 0.1em;
+}
+
+/* Display equation. */
+.sci-eq {
+	display: block;
+	font-family: var(--mono);
+	font-size: 13.5px;
+	font-weight: 500;
+	line-height: 1.85;
+	letter-spacing: 0.01em;
+	color: var(--text);
+	font-variant-numeric: tabular-nums lining-nums;
+	white-space: pre;
+	overflow-x: auto;
+	overflow-y: hidden;
+	padding-bottom: 2px;
+	scrollbar-width: thin;
+}
+
+.sci-eq sub,
+.sci-eq sup {
+	font-size: 0.72em;
+}
+
+/* ═══════════════════════════  citations  ══════════════════════════ */
+
+/* Holds the last word plus its marker, so the marker never wraps alone. */
+.cite-bind {
+	white-space: nowrap;
+}
+
+.cite {
+	position: relative;
+	display: inline;
+	white-space: nowrap;
+}
+
+.cite-marker {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 15px;
+	height: 15px;
+	margin: 0 1px 0 2px;
+	padding: 0 3px;
+	vertical-align: super;
+	background: rgba(200, 240, 60, 0.12);
+	border: 1px solid rgba(200, 240, 60, 0.34);
+	border-radius: 3px;
+	color: var(--u235);
+	font-family: var(--mono);
+	font-size: 9px;
+	font-weight: 500;
+	line-height: 1;
+	cursor: pointer;
+	transition: background 160ms, border-color 160ms;
+}
+
+.cite-marker:hover,
+.cite-marker:focus-visible,
+.cite.is-open .cite-marker {
+	background: var(--u235);
+	border-color: var(--u235);
+	color: var(--void);
+}
+
+/*
+ * Portalled tooltip. Fixed to the viewport and positioned from the marker's
+ * rect, so the simulation panel's scroll container cannot clip it. It grows
+ * out of the marker rather than fading in place: the origin tells you which
+ * marker it belongs to without needing an arrow.
+ */
+.cite-tip {
+	position: fixed;
+	z-index: 130;
+	width: 300px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 11px 13px 12px;
+	background: rgba(10, 13, 19, 0.98);
+	border: 1px solid var(--line);
+	border-radius: 5px;
+	box-shadow:
+		0 18px 40px -14px rgba(0, 0, 0, 0.85),
+		inset 0 1px 0 rgba(232, 228, 218, 0.05);
+	white-space: normal;
+	text-shadow: none;
+	text-align: left;
+	animation: tipIn 190ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.cite-tip::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: linear-gradient(90deg, var(--u235), transparent 70%);
+	border-radius: 5px 5px 0 0;
+}
+
+.cite-tip--above {
+	transform: translateY(-100%);
+	transform-origin: bottom center;
+}
+
+.cite-tip--above::before {
+	bottom: 0;
+	background: linear-gradient(90deg, var(--u235), transparent 70%);
+}
+
+.cite-tip--below {
+	transform-origin: top center;
+}
+
+.cite-tip--below::before {
+	top: 0;
+}
+
+@keyframes tipIn {
+	from {
+		opacity: 0;
+		transform: var(--tip-base, none) scale(0.94);
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.cite-tip--above {
+	--tip-base: translateY(-100%);
+}
+
+.cite-pop-kind {
+	font-family: var(--mono);
+	font-size: 8.5px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--cake);
+}
+
+.cite-pop-title {
+	font-family: var(--display);
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 1.2;
+	letter-spacing: -0.015em;
+	color: var(--text);
+}
+
+.cite-pop-meta {
+	font-family: var(--mono);
+	font-size: 9.5px;
+	line-height: 1.45;
+	color: var(--muted);
+}
+
+.cite-pop-note {
+	font-size: 12px;
+	line-height: 1.52;
+	color: var(--muted);
+}
+
+.cite-pop-link {
+	margin-top: 2px;
+	font-family: var(--mono);
+	font-size: 9.5px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--u235);
+	text-decoration: none;
+}
+
+.cite-pop-link:hover {
+	text-decoration: underline;
+}
+
+/* ──────────────────────────  works cited  ─────────────────────────── */
+
+.works {
+	list-style: none;
+	margin: 26px 0 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	counter-reset: none;
+}
+
+.works-item {
+	display: grid;
+	grid-template-columns: 30px 1fr;
+	gap: 12px;
+	padding: 15px 0;
+	border-top: 1px solid var(--line);
+	scroll-margin-top: 90px;
+}
+
+.works-n {
+	font-family: var(--mono);
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--u235);
+	padding-top: 2px;
+}
+
+.works-body {
+	min-width: 0;
+}
+
+.works-title {
+	margin: 0 0 5px;
+	font-family: var(--display);
+	font-weight: 600;
+	font-size: 15px;
+	line-height: 1.24;
+	letter-spacing: -0.015em;
+}
+
+.works-title a {
+	color: var(--text);
+	text-decoration: none;
+}
+
+.works-title a:hover {
+	color: var(--u235);
+}
+
+.works-meta {
+	margin: 0 0 8px;
+	font-family: var(--mono);
+	font-size: 10px;
+	line-height: 1.5;
+	color: var(--muted);
+}
+
+.works-kind {
+	display: inline-block;
+	margin-left: 8px;
+	padding: 2px 7px;
+	background: rgba(35, 43, 58, 0.8);
+	border-radius: 2px;
+	font-size: 8.5px;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--cake);
+}
+
+.works-note {
+	margin: 0;
+	font-size: 12.5px;
+	line-height: 1.55;
+	color: var(--muted);
+}
+
+/* Sources chapter reads as a document, so it gets a wider, quieter card. */
+.chapter--sources {
+	justify-content: center;
+	align-items: flex-start;
+	padding-top: 96px;
+	padding-bottom: 120px;
+}
+
+.chapter--sources .chapter-card {
+	max-width: 820px;
+}
+
+.panel-sources {
+	margin-top: 26px;
+	padding-top: 18px;
+	border-top: 1px solid var(--line);
+}
+
+.panel-sources summary {
+	font-family: var(--mono);
+	font-size: 10.5px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--muted);
+	cursor: pointer;
+}
+
+.panel-sources summary:hover {
+	color: var(--u235);
+}
+
+.panel-sources .works-title {
+	font-size: 13.5px;
+}
+
+.panel-sources .works-note {
+	font-size: 11.5px;
 }
 
 /* ─────────────────────────────  shell  ───────────────────────────── */
@@ -420,8 +763,10 @@ body::after {
 	transform: translateY(-50%);
 }
 
-.chapter--intro,
-.chapter--handoff {
+/* Doubled class so this beats `.chapter:nth-child(even)`, which was pushing
+   the handoff hard against the right edge. */
+.chapter.chapter--intro,
+.chapter.chapter--handoff {
 	justify-content: center;
 	text-align: center;
 }
@@ -497,8 +842,11 @@ body::after {
 .chapter--intro .chapter-card,
 .chapter--handoff .chapter-card {
 	position: relative;
-	max-width: 640px;
-	padding: 0;
+	/* Interior padding on top of the max-width: the vignette behind these two
+	   is soft-edged, so text running to the very edge of the box had nothing
+	   to sit against. */
+	max-width: 700px;
+	padding: 8px 30px 12px;
 	background: transparent;
 	backdrop-filter: none;
 	border: none;
@@ -1177,6 +1525,19 @@ body::after {
 	word-break: break-word;
 }
 
+/* Numbers everywhere in the interface: tabular so digits do not jitter as
+   values animate, lining so they sit on the same baseline as the caps. */
+.figure-value,
+.chapter-stat-value,
+.readout dd,
+.assay-chip b,
+.controls-label b,
+.ladder-tick,
+.works-n {
+	font-variant-numeric: tabular-nums lining-nums;
+	font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
 .eqn small {
 	display: block;
 	margin-top: 9px;
@@ -1618,6 +1979,175 @@ input[type="range"]::-moz-range-thumb {
 	}
 
 	.ladder-caption {
+		display: none;
+	}
+}
+
+/* ════════════════════════  mobile refinements  ════════════════════ */
+
+@media (max-width: 820px) {
+	/*
+	 * A popover anchored to the marker cannot fit beside it on a phone: it
+	 * overflowed the viewport by more than a third of its width. On small
+	 * screens the source is portalled to the body as a bottom sheet instead,
+	 * which needs no edge maths and lands where a thumb already is.
+	 */
+	.cite-sheet-wrap {
+		position: fixed;
+		inset: 0;
+		z-index: 120;
+	}
+
+	.cite-sheet-scrim {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		padding: 0;
+		border: none;
+		background: rgba(4, 6, 10, 0.55);
+		cursor: pointer;
+		animation: scrimIn 200ms ease both;
+	}
+
+	@keyframes scrimIn {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+
+	.cite-sheet {
+		position: absolute;
+		left: 10px;
+		right: 10px;
+		bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		max-height: 62vh;
+		overflow-y: auto;
+		padding: 17px 18px 16px;
+		background: rgba(9, 12, 18, 0.99);
+		border: 1px solid var(--line);
+		border-top: 2px solid var(--u235);
+		border-radius: 6px;
+		box-shadow: 0 -14px 50px -8px rgba(0, 0, 0, 0.92);
+		animation: sheetIn 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+
+	@keyframes sheetIn {
+		from { transform: translateY(18px); opacity: 0; }
+		to { transform: none; opacity: 1; }
+	}
+
+	.cite-sheet .cite-pop-note {
+		font-size: 13px;
+	}
+
+	.cite-sheet .cite-pop-meta {
+		font-size: 10.5px;
+	}
+
+	.cite-sheet .cite-pop-kind {
+		font-size: 9.5px;
+	}
+
+	.cite-sheet .cite-pop-link {
+		margin-top: 6px;
+		padding: 9px 0;
+		font-size: 11px;
+	}
+
+	.cite-sheet-close {
+		margin-top: 10px;
+		padding: 11px;
+		background: var(--panel-hi);
+		border: 1px solid var(--line);
+		border-radius: 4px;
+		color: var(--text);
+		font-family: var(--mono);
+		font-size: 11px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		cursor: pointer;
+	}
+
+	.cite-marker {
+		min-width: 18px;
+		height: 18px;
+		font-size: 10px;
+	}
+
+	.cite-pop-note {
+		font-size: 13px;
+	}
+
+	/* Works cited: the number column is wasted width on a phone. */
+	.works-item {
+		grid-template-columns: 22px 1fr;
+		gap: 10px;
+		padding: 14px 0;
+	}
+
+	.works-title {
+		font-size: 14.5px;
+	}
+
+	.works-meta {
+		font-size: 9.5px;
+	}
+
+	.works-kind {
+		display: inline-block;
+		margin: 5px 0 0;
+	}
+
+	.chapter--sources {
+		padding-top: 84px;
+		padding-bottom: 90px;
+	}
+
+	.chapter.chapter--intro .chapter-card,
+	.chapter.chapter--handoff .chapter-card {
+		padding: 4px 6px 8px;
+	}
+
+	.chapter-stat-value {
+		font-size: 42px;
+	}
+
+	/* Long equations scroll rather than forcing the page sideways. */
+	.sci-eq {
+		font-size: 12.5px;
+	}
+
+	/* Safe areas: the rail and header sit against the notch and home bar. */
+	.head {
+		padding-left: max(20px, env(safe-area-inset-left));
+		padding-right: max(20px, env(safe-area-inset-right));
+	}
+
+	.rail {
+		padding-bottom: env(safe-area-inset-bottom, 0px);
+	}
+
+	.journey-head {
+		padding-top: max(16px, env(safe-area-inset-top));
+	}
+}
+
+/* Landscape phones: the journey card would otherwise fill the whole screen. */
+@media (max-height: 520px) and (orientation: landscape) {
+	.chapter {
+		padding-top: 68px;
+		padding-bottom: 40px;
+		align-items: flex-start;
+	}
+
+	.chapter-card {
+		max-height: none;
+	}
+
+	.scroll-cue {
 		display: none;
 	}
 }

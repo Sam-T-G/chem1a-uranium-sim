@@ -2,19 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { CHAPTERS, type ChapterId } from "./chapters";
 import JourneyCanvas from "./JourneyCanvas";
 import { useSim } from "../store";
-
-/** Minimal inline formatter for **bold** and *italic* in the chapter copy. */
-function inline(text: string, keyBase: string) {
-	const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
-	return parts.map((p, i) => {
-		const k = `${keyBase}-${i}`;
-		if (p.startsWith("**") && p.endsWith("**"))
-			return <strong key={k}>{p.slice(2, -2)}</strong>;
-		if (p.startsWith("*") && p.endsWith("*") && p.length > 2)
-			return <em key={k}>{p.slice(1, -1)}</em>;
-		return <span key={k}>{p}</span>;
-	});
-}
+import { inline } from "../ui/Cite";
+import WorksCited from "../ui/WorksCited";
 
 /**
  * Count-up for the chapter stat. Runs once when the chapter card reveals,
@@ -159,7 +148,7 @@ export default function Journey() {
 				<span className="journey-mark">
 					<sup>235</sup>U
 				</span>
-				<span className="journey-title">The rock nobody wanted</span>
+				<span className="journey-title">Uranium</span>
 				<span className="journey-spacer" />
 				<button type="button" className="journey-skip" onClick={enterSim}>
 					Skip to the simulation
@@ -212,8 +201,6 @@ export default function Journey() {
 								</p>
 							))}
 
-							{c.pull && <p className="chapter-pull">{c.pull}</p>}
-
 							{c.stat && (
 								<div className="chapter-stat">
 									<span className="chapter-stat-value">
@@ -224,7 +211,7 @@ export default function Journey() {
 										/>
 									</span>
 									<span className="chapter-stat-unit">{c.stat.unit}</span>
-									<p className="chapter-stat-note">{c.stat.note}</p>
+									<p className="chapter-stat-note">{inline(c.stat.note, `${c.id}-stat`)}</p>
 								</div>
 							)}
 
@@ -243,6 +230,8 @@ export default function Journey() {
 									Enter the simulation
 								</button>
 							)}
+
+							{c.id === "sources" && <WorksCited />}
 						</div>
 
 						{c.id === "intro" && (
