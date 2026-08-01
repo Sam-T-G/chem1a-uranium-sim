@@ -21,7 +21,8 @@ import Journey from "./journey/Journey";
 import Effects from "./three/Effects";
 import AdaptiveQuality from "./three/AdaptiveQuality";
 import { inline } from "./ui/Cite";
-import { Equation, sci } from "./ui/Sci";
+import { sci } from "./ui/Sci";
+import ReactionView from "./ui/Reaction";
 import WorksCited from "./ui/WorksCited";
 
 /**
@@ -78,7 +79,7 @@ const LEGENDS: Partial<Record<StageId, { dot: string; text: string }[]>> = {
 	enrichment: [
 		{ dot: C.u235, text: "U-235 · drifts toward the axis" },
 		{ dot: C.u238, text: "U-238 · driven to the wall" },
-		{ dot: C.cake, text: "cascade · lit by separative work" },
+		{ dot: C.cake, text: "machines · lit by how much work it takes" },
 	],
 	fission: [
 		{ dot: C.u235, text: "U-235 · fissions" },
@@ -283,11 +284,11 @@ function Simulation() {
 						))}
 					</div>
 
-					{info.equation && (
+					{info.reaction && (
 						<div className="eqn">
-							<Equation label={info.equationLabel}>{info.equation}</Equation>
-							{info.equationNote && (
-								<small>{inline(info.equationNote, `${stage}-eqn`)}</small>
+							<ReactionView reaction={info.reaction} label={info.reactionLabel} />
+							{info.reactionNote && (
+								<small>{inline(info.reactionNote, `${stage}-rxn`)}</small>
 							)}
 						</div>
 					)}
@@ -305,8 +306,8 @@ function Simulation() {
 
 					{preEnrichment && (
 						<p className="note">
-							Assay is fixed at {(ASSAY.natural * 100).toFixed(2)}% through this
-							stage. Nothing before enrichment changes the isotope ratio.
+							The mix stays at {(ASSAY.natural * 100).toFixed(2)}% U-235 through this stage.
+							Nothing before enrichment changes the ratio of the two isotopes.
 						</p>
 					)}
 

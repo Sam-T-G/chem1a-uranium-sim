@@ -16,10 +16,10 @@ function toFrac(assay: number): number {
 }
 
 const TICKS = [
-	{ v: ASSAY.tails, label: "0.25  tails", major: false },
+	{ v: ASSAY.tails, label: "0.25  leftover", major: false },
 	{ v: ASSAY.natural, label: "0.72  natural", major: true },
 	{ v: ASSAY.leu, label: "5  reactor fuel", major: true },
-	{ v: ASSAY.haleu, label: "20  HEU line", major: true, threshold: true },
+	{ v: ASSAY.haleu, label: "20  highly enriched", major: true, threshold: true },
 	{ v: ASSAY.weapons, label: "90  weapons-grade", major: true },
 ];
 

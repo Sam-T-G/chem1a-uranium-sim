@@ -111,31 +111,3 @@ export function sci(text: string, keyBase = "sci"): ReactNode[] {
 	flush();
 	return out;
 }
-
-/** Inline chemical formula or quantity inside running prose. */
-export function Formula({ children }: { children: string }) {
-	return <span className="sci">{sci(children)}</span>;
-}
-
-/**
- * Display equation. `label` is the plain-language reading, used as the
- * accessible name so a screen reader gets something sayable instead of a
- * character-by-character spell-out.
- */
-export function Equation({
-	children,
-	label,
-}: {
-	children: string;
-	label?: string;
-}) {
-	return (
-		<div
-			className="sci-eq"
-			role="math"
-			aria-label={label ?? children.replace(/[_^{}]/g, " ")}
-		>
-			{sci(children)}
-		</div>
-	);
-}

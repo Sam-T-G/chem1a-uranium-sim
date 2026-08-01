@@ -25,7 +25,7 @@ export function EnrichmentControls() {
 	return (
 		<div className={`controls${heu ? " is-heu" : ""}`}>
 			<div className={`controls-label${heu ? " is-heu" : ""}`}>
-				<span>Target product assay</span>
+				<span>Target enrichment</span>
 				<b>{fmtAssay(assay)}%</b>
 			</div>
 
@@ -35,7 +35,7 @@ export function EnrichmentControls() {
 				max={1000}
 				step={1}
 				value={sliderValue}
-				aria-label="Target product assay, percent uranium-235"
+				aria-label="Target enrichment, percent uranium-235"
 				style={{ "--fill": `${sliderValue / 10}%` } as React.CSSProperties}
 				onChange={(e) => {
 					const f = Number(e.target.value) / 1000;
@@ -59,14 +59,14 @@ export function EnrichmentControls() {
 
 			<dl className="readout">
 				<div>
-					<dt>Feed</dt>
+					<dt>Uranium in</dt>
 					<dd>
 						{cost.feedPerProduct.toFixed(1)}
 						<small>kg</small>
 					</dd>
 				</div>
 				<div>
-					<dt>Tails</dt>
+					<dt>Left over</dt>
 					<dd>
 						{cost.tailsPerProduct.toFixed(1)}
 						<small>kg</small>
@@ -82,11 +82,13 @@ export function EnrichmentControls() {
 			</dl>
 
 			<p className="note">
-				Per kilogram of product, from natural feed at 0.72% with tails left at
-				0.25%. <strong>Watch the effort figure against the assay:</strong> reaching
-				60% costs most of the separative work needed to reach 90%. That asymmetry is
-				why a stockpile part-way up the scale is treated as most of the way to a
-				weapon.
+					For every kilogram of enriched uranium you end up with, starting from
+					ordinary uranium. Effort is measured in separative work units, SWU, which
+					is just a way of counting how much separating had to happen. The leftover
+					still contains a little U-235, just not enough to be worth running again.
+					<strong>Watch the effort number as you raise the target:</strong> reaching
+					60% already costs most of what 90% costs, which is why a country sitting at
+					60% is treated as most of the way there.
 			</p>
 
 			{heu && (
@@ -98,9 +100,10 @@ export function EnrichmentControls() {
 			)}
 
 			<p className="note">
-				Separation inside the rotor is drawn exaggerated so the mechanism is
-				visible. One real machine shifts the assay by a fraction of a percent, which
-				is why the cascade behind it grows as you raise the target.
+					The separation inside the machine is drawn much larger than it really
+					is, so you can see it happening. One real centrifuge changes the mix by
+					a fraction of a percent. That is why the wall of machines behind it
+					keeps growing as you ask for more.
 			</p>
 		</div>
 	);
@@ -128,20 +131,20 @@ export function FissionControls({
 	const verdict =
 		stats.neutrons === 0 && firing
 			? burnedOut
-				? "Chain stopped only because the lattice ran out of U-235."
-				: "Chain terminated. Every neutron was captured by U-238 or leaked out."
+				? "The chain stopped because it ran out of U-235 to split, not because it failed."
+				: "The chain died. Every neutron was either absorbed by U-238 or escaped the block."
 			: // Threshold set from observed runs: sub-20 % assays peak in the low
 				// single digits, weapons assay clears this comfortably.
 				stats.neutrons > 24
-				? "Runaway. Neutron population is multiplying faster than it is lost."
+				? "Running away. Neutrons are being made faster than they are being lost."
 				: stats.neutrons > 0
-					? "Propagating."
-					: "Idle. Fire a neutron to start.";
+					? "Spreading."
+					: "Nothing running. Fire a neutron to start.";
 
 	return (
 		<div className="controls">
 			<div className="controls-label">
-				<span>Chain reaction · lattice at {fmtAssay(assay)}%</span>
+				<span>Chain reaction · block at {fmtAssay(assay)}% U-235</span>
 			</div>
 
 			<dl className="readout">
@@ -150,7 +153,7 @@ export function FissionControls({
 					<dd>{stats.fissions}</dd>
 				</div>
 				<div>
-					<dt>Free n</dt>
+					<dt>Loose neutrons</dt>
 					<dd>{stats.neutrons}</dd>
 				</div>
 				<div>
@@ -169,22 +172,23 @@ export function FissionControls({
 				className={`btn${firing ? " is-stop" : ""}`}
 				onClick={() => setFiring(!firing)}
 			>
-				{firing ? "Reset lattice" : "Fire a neutron"}
+				{firing ? "Reset" : "Fire a neutron"}
 			</button>
 
 			<p className="note">{verdict}</p>
 
 			<p className="note">
-				The run starts by inducing one fission at the center. What the assay decides
-				is whether that fission propagates. Go back to <strong>stage 04</strong>,
-				change the assay, and run this again: at 0.72% the released neutrons are
-				captured by U-238 within a generation or two, and at 90% almost every one
-				finds another U-235.
+					The run begins by splitting one nucleus in the middle. What the enrichment
+					decides is whether that split spreads. Go back to <strong>stage 04</strong>,
+					change the enrichment, and run it again: at 0.72% the neutrons that come out
+					are absorbed by U-238 almost immediately, and at 90% nearly every one of them
+					finds another U-235.
 			</p>
 
 			<p className="note">
-				Branching only. Cross-sections, moderation and geometry are not modeled, so
-				treat this as a diagram of the logic rather than a neutronics result.
+					This only keeps track of one thing: whether each neutron happens to reach a
+					U-235 or a U-238. A real reactor depends on much more than that, so treat the
+					counts here as a picture of the idea rather than real numbers.
 			</p>
 		</div>
 	);
