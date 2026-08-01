@@ -17,6 +17,7 @@ import Fission from "./three/scenes/Fission";
 import AssayLadder, { AssayChip } from "./ui/AssayLadder";
 import ProcessRail from "./ui/ProcessRail";
 import { EnrichmentControls, FissionControls } from "./ui/Controls";
+import Journey from "./journey/Journey";
 
 /** Camera framing per stage, since the scenes differ a lot in scale. */
 const VIEWS: Record<
@@ -77,12 +78,28 @@ function CameraRig({ stage }: { stage: StageId }) {
 }
 
 export default function App() {
+	const mode = useSim((s) => s.mode);
+	const setReducedMotion = useSim((s) => s.setReducedMotion);
+
+	// Detected once at the root so both the journey and the simulation honour it.
+	useEffect(() => {
+		const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+		const apply = () => setReducedMotion(mq.matches);
+		apply();
+		mq.addEventListener("change", apply);
+		return () => mq.removeEventListener("change", apply);
+	}, [setReducedMotion]);
+
+	return mode === "journey" ? <Journey /> : <Simulation />;
+}
+
+function Simulation() {
 	const stage = useSim((s) => s.stage);
 	const rawAssay = useSim((s) => s.assay);
 	const spinning = useSim((s) => s.spinning);
 	const firing = useSim((s) => s.firing);
 	const reduced = useSim((s) => s.reducedMotion);
-	const setReducedMotion = useSim((s) => s.setReducedMotion);
+	const setMode = useSim((s) => s.setMode);
 	const next = useSim((s) => s.next);
 	const prev = useSim((s) => s.prev);
 
@@ -100,14 +117,6 @@ export default function App() {
 			setFissionStats(s),
 		[],
 	);
-
-	useEffect(() => {
-		const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-		const apply = () => setReducedMotion(mq.matches);
-		apply();
-		mq.addEventListener("change", apply);
-		return () => mq.removeEventListener("change", apply);
-	}, [setReducedMotion]);
 
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => {
@@ -152,6 +161,14 @@ export default function App() {
 	return (
 		<div className="app">
 			<header className="head">
+				<button
+					type="button"
+					className="head-back"
+					onClick={() => setMode("journey")}
+					aria-label="Back to the story"
+				>
+					←
+				</button>
 				<div className="head-mark">
 					<sup>235</sup>U — the fuel cycle
 				</div>

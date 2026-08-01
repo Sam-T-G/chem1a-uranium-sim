@@ -1,12 +1,29 @@
-# Uranium-235 — the fuel cycle, stage by stage
+# The rock nobody wanted
 
-An animated 3D walkthrough of what happens to uranium between the mine and the reactor core, built as a companion to a Chem 1A element report.
+A scroll-through story about uranium that ends inside a working simulation of the fuel cycle. Written for a Chem 1A element report.
 
 **Live: https://sam-t-g.github.io/chem1a-uranium-sim/**
 
-## What it shows
+## Two halves
 
-Six stages, navigable from the rail at the bottom or with the ← → arrow keys.
+**The journey** opens the page: eight scroll chapters, each with its own three.js scene, covering how an element that spent eighteen centuries as a glass pigment became the thing treaties are written about.
+
+| | Chapter | Scene |
+|---|---|---|
+| — | The rock nobody wanted | Ore turning under a moving rim light |
+| 01 | For eighteen centuries it was just a pigment | Uranium glass flaring green as a UV lamp sweeps past |
+| 02 | Named after a planet, by a man who never held it | Pitchblende, and Uranus behind it |
+| 03 | Barium, where barium could not possibly be | A nucleus stretching, pinching and splitting, on a loop |
+| 04 | Only one atom in 139 is any use | A thousand atoms drifting; seven are U-235 |
+| 05 | So they built the largest building in the world | A separation hall running out past the fog |
+| 06 | The same machine makes both | The assay scale climbing through the 20 % line |
+| — | Now run it yourself | Stage 01 of the simulation, already on screen |
+
+The last chapter's scene *is* the simulation's first scene at the same camera, so pressing **Enter the simulation** changes the interface without cutting away from the image. A back arrow in the simulation header returns to the story.
+
+## The simulation
+
+Six stages, navigable from the rail at the bottom or with the ← → arrow keys. Skippable from the journey header at any point.
 
 | | Stage | What you see |
 |---|---|---|
@@ -46,7 +63,9 @@ Worth being explicit about, because this is a teaching aid.
 - **[@react-three/fiber](https://github.com/pmndrs/react-three-fiber)** — React renderer for three.js
 - **[@react-three/drei](https://github.com/pmndrs/drei)** — `OrbitControls`, plus `Environment`/`Lightformer` for a locally generated environment map, so the page fetches nothing from a CDN at runtime
 - **zustand** — stage and assay state
-- **three.js** — instanced meshes throughout; the fission lattice, ore specks and centrifuge gas are each a single draw call
+- **three.js** — instanced meshes throughout; the fission lattice, ore specks, atom crowd and centrifuge gas are each a single draw call
+
+The journey uses ordinary DOM scrolling with a fixed canvas behind it rather than `ScrollControls`, so the chapter text stays styleable CSS and the scenes swap on whichever section owns the middle of the viewport.
 
 No rigid-body physics engine. Rapier or cannon model collisions between solids, which is not what either simulation here needs: centrifugal isotope separation is a drift-and-counter-current problem, and a chain reaction is neutron transport with branching. Both are written directly against the behaviour being shown, in `src/three/scenes/Enrichment.tsx` and `src/three/scenes/Fission.tsx`.
 
