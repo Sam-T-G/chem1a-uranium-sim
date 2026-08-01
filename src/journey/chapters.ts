@@ -10,6 +10,10 @@ export type ChapterId =
 
 export interface Chapter {
 	id: ChapterId;
+	/** Two-digit sequence numeral, rendered as the ghost behind the card. */
+	index?: string;
+	/** One-word label for the progress rail. */
+	short: string;
 	/** Small label above the heading. Empty for the intro and handoff. */
 	kicker?: string;
 	heading: string;
@@ -24,6 +28,7 @@ export interface Chapter {
 export const CHAPTERS: Chapter[] = [
 	{
 		id: "intro",
+		short: "Intro",
 		heading: "The rock nobody wanted",
 		body: [
 			"I picked uranium because of a movie.",
@@ -35,6 +40,8 @@ export const CHAPTERS: Chapter[] = [
 
 	{
 		id: "glass",
+		index: "01",
+		short: "Pigment",
 		kicker: "79 CE – 1930s",
 		heading: "For eighteen centuries it was just a pigment",
 		body: [
@@ -48,6 +55,8 @@ export const CHAPTERS: Chapter[] = [
 
 	{
 		id: "name",
+		index: "02",
+		short: "The name",
 		kicker: "1789 – 1896",
 		heading: "Named after a planet, by a man who never held it",
 		body: [
@@ -61,6 +70,8 @@ export const CHAPTERS: Chapter[] = [
 
 	{
 		id: "berlin",
+		index: "03",
+		short: "Fission",
 		kicker: "December 1938",
 		heading: "Barium, where barium could not possibly be",
 		body: [
@@ -80,6 +91,8 @@ export const CHAPTERS: Chapter[] = [
 
 	{
 		id: "problem",
+		index: "04",
+		short: "0.72%",
 		kicker: "The actual problem",
 		heading: "Only one atom in 139 is any use",
 		body: [
@@ -95,6 +108,8 @@ export const CHAPTERS: Chapter[] = [
 
 	{
 		id: "oakridge",
+		index: "05",
+		short: "Oak Ridge",
 		kicker: "1943 – 1945",
 		heading: "So they built the largest building in the world",
 		body: [
@@ -114,6 +129,8 @@ export const CHAPTERS: Chapter[] = [
 
 	{
 		id: "line",
+		index: "06",
+		short: "The line",
 		kicker: "1970 – now",
 		heading: "The same machine makes both",
 		body: [
@@ -129,6 +146,7 @@ export const CHAPTERS: Chapter[] = [
 
 	{
 		id: "handoff",
+		short: "Run it",
 		heading: "Now run it yourself",
 		body: [
 			"Reading that enrichment is hard is not the same as seeing why.",

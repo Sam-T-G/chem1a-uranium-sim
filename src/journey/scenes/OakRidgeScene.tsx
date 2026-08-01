@@ -11,19 +11,28 @@ import { Lighting, dummy, mulberry32 } from "../../three/shared";
  */
 
 const COLS = 9;
-const ROWS = 26;
+const ROWS = 34;
 const N = COLS * ROWS;
 const SPACING_X = 3.6;
 const SPACING_Z = 4.4;
+// A faint light shaft hangs under every third column's lamp. COLS is divisible
+// by 3, so this reads as three straight lit lanes running down the hall.
+const SHAFT_N = N / 3;
 
 export default function OakRidgeScene({ reduced }: { reduced: boolean }) {
 	const units = useRef<THREE.InstancedMesh>(null);
 	const pipes = useRef<THREE.InstancedMesh>(null);
 	const glow = useRef<THREE.InstancedMesh>(null);
+	const shafts = useRef<THREE.InstancedMesh>(null);
 	const rig = useRef<THREE.Group>(null);
 
 	useLayoutEffect(() => {
+		// Draw the heights once so every layer agrees on them. Drawing per-pass
+		// advanced the sequence and left the lamps floating off their columns.
 		const rnd = mulberry32(1943);
+		const heights = new Float32Array(N);
+		for (let i = 0; i < N; i++) heights[i] = 4.2 + rnd() * 0.5;
+
 		const place = (mesh: THREE.InstancedMesh | null, kind: "unit" | "pipe" | "glow") => {
 			if (!mesh) return;
 			for (let i = 0; i < N; i++) {
@@ -31,7 +40,7 @@ export default function OakRidgeScene({ reduced }: { reduced: boolean }) {
 				const r = Math.floor(i / COLS);
 				const x = (c - (COLS - 1) / 2) * SPACING_X;
 				const z = -r * SPACING_Z;
-				const h = 4.2 + rnd() * 0.5;
+				const h = heights[i];
 
 				if (kind === "unit") {
 					dummy.position.set(x, h / 2 - 1.8, z);
@@ -54,6 +63,23 @@ export default function OakRidgeScene({ reduced }: { reduced: boolean }) {
 		place(units.current, "unit");
 		place(pipes.current, "pipe");
 		place(glow.current, "glow");
+
+		// Shafts: apex at the lamp, spreading down. Every third column only.
+		if (shafts.current) {
+			dummy.rotation.set(0, 0, 0);
+			dummy.scale.setScalar(1);
+			for (let j = 0; j < SHAFT_N; j++) {
+				const i = j * 3;
+				const c = i % COLS;
+				const r = Math.floor(i / COLS);
+				const x = (c - (COLS - 1) / 2) * SPACING_X;
+				const z = -r * SPACING_Z;
+				dummy.position.set(x, heights[i] - 1.75 - 1.2, z);
+				dummy.updateMatrix();
+				shafts.current.setMatrixAt(j, dummy.matrix);
+			}
+			shafts.current.instanceMatrix.needsUpdate = true;
+		}
 	}, []);
 
 	// Slow push down the hall, so the depth registers.
@@ -99,17 +125,52 @@ export default function OakRidgeScene({ reduced }: { reduced: boolean }) {
 					<meshStandardMaterial
 						color={C.cake}
 						emissive={C.cake}
-						emissiveIntensity={2}
+						emissiveIntensity={3}
 						toneMapped={false}
 					/>
 				</instancedMesh>
 
-				{/* Floor */}
-				<mesh rotation-x={-Math.PI / 2} position={[0, -1.82, -55]}>
-					<planeGeometry args={[60, 130]} />
-					<meshStandardMaterial color="#1C212C" roughness={0.95} />
+				{/* Faint cones of lamp light. Not physical volumetrics, just an
+				    additive haze that suggests dust in the air. */}
+				<instancedMesh
+					ref={shafts}
+					args={[undefined, undefined, SHAFT_N]}
+					frustumCulled={false}
+				>
+					<coneGeometry args={[0.75, 2.4, 12, 1, true]} />
+					<meshBasicMaterial
+						color={C.cake}
+						transparent
+						opacity={0.045}
+						blending={THREE.AdditiveBlending}
+						depthWrite={false}
+						side={THREE.DoubleSide}
+					/>
+				</instancedMesh>
+
+				{/* Floor. Low roughness + metalness so the env map reads as a
+				    wet-concrete sheen under the lamp rows. */}
+				<mesh rotation-x={-Math.PI / 2} position={[0, -1.82, -70]}>
+					<planeGeometry args={[60, 170]} />
+					<meshStandardMaterial color="#232937" roughness={0.35} metalness={0.55} />
 				</mesh>
 			</group>
+
+			{/* Warm haze where the hall vanishes: the far wall you never reach.
+			    fog is off so distance does not swallow it. */}
+			<mesh position={[0, -0.4, -118]}>
+				<planeGeometry args={[34, 7]} />
+				<meshBasicMaterial
+					color={C.cake}
+					transparent
+					opacity={0.05}
+					blending={THREE.AdditiveBlending}
+					depthWrite={false}
+					// Sits far beyond fogFar, so without this it resolves to fog
+					// colour and the vanishing-point glow never renders at all.
+					fog={false}
+				/>
+			</mesh>
 
 			{/* Scale reference: roughly a person, at the near end. */}
 			<group position={[-4.6, -1.15, 7.2]}>

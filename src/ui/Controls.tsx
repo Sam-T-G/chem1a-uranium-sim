@@ -36,6 +36,7 @@ export function EnrichmentControls() {
 				step={1}
 				value={sliderValue}
 				aria-label="Target product assay, percent uranium-235"
+				style={{ "--fill": `${sliderValue / 10}%` } as React.CSSProperties}
 				onChange={(e) => {
 					const f = Number(e.target.value) / 1000;
 					setAssay(Math.exp(LO + f * (HI - LO)));
@@ -115,10 +116,23 @@ export function FissionControls({
 	const firing = useSim((s) => s.firing);
 	const setFiring = useSim((s) => s.setFiring);
 
+	// A run that racks up a large share of the available fissile sites did not
+	// die because U-238 ate it: it ran out of fuel. Saying otherwise would
+	// misattribute the ending at exactly the assay where the point lands.
+	// The absolute floor matters: at natural abundance the lattice holds about
+	// two fissile sites, so a share test alone would call a single fission
+	// "ran out of fuel" when what actually happened is U-238 ate the neutrons.
+	const fissileSites = Math.round(assay * 343);
+	const burnedOut = stats.fissions >= 8 && stats.fissions > 0.4 * fissileSites;
+
 	const verdict =
 		stats.neutrons === 0 && firing
-			? "Chain terminated. Every neutron was captured by U-238 or leaked out."
-			: stats.neutrons > 260
+			? burnedOut
+				? "Chain stopped only because the lattice ran out of U-235."
+				: "Chain terminated. Every neutron was captured by U-238 or leaked out."
+			: // Threshold set from observed runs: sub-20 % assays peak in the low
+				// single digits, weapons assay clears this comfortably.
+				stats.neutrons > 24
 				? "Runaway. Neutron population is multiplying faster than it is lost."
 				: stats.neutrons > 0
 					? "Propagating."

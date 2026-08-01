@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { C } from "../../theme";
@@ -73,11 +73,18 @@ function Piece({
 	phase,
 	reduced,
 }: PieceProps) {
-	const mat = useRef<THREE.MeshStandardMaterial>(null);
+	const mat = useRef<THREE.MeshPhysicalMaterial>(null);
 	const halo = useRef<THREE.Mesh>(null);
+	const pool = useRef<THREE.MeshBasicMaterial>(null);
 	const grp = useRef<THREE.Group>(null);
 
 	const geo = useMemo(() => new THREE.LatheGeometry(profile, 48), [profile]);
+	// Built imperatively rather than declared in JSX, so R3F will not dispose it
+	// for us when the chapter unmounts.
+	useEffect(() => () => geo.dispose(), [geo]);
+	// Local y that lands the glow pool just above the shelf top (world y −1.54)
+	// whatever the piece's own position and scale.
+	const poolY = (-1.52 - position[1]) / scale;
 
 	useFrame((state) => {
 		// Each piece lights as the lamp sweeps past its own x position.
@@ -88,14 +95,16 @@ function Piece({
 		if (mat.current) {
 			mat.current.color.copy(DAYLIGHT).lerp(FLUORESCE, lit);
 			mat.current.emissive.copy(FLUORESCE);
-			mat.current.emissiveIntensity = 0.05 + lit * 1.5;
-			mat.current.opacity = 0.55 + lit * 0.3;
+			// Crosses the bloom threshold (>1, tone mapping off) only when lit,
+			// so the glow is the fluorescence and nothing else.
+			mat.current.emissiveIntensity = 0.05 + lit * 2.35;
 		}
 		if (halo.current) {
 			const m = halo.current.material as THREE.MeshBasicMaterial;
-			m.opacity = lit * 0.1;
+			m.opacity = lit * 0.07;
 			halo.current.scale.setScalar(0.95 + lit * 0.28);
 		}
+		if (pool.current) pool.current.opacity = lit * 0.2;
 		if (grp.current && !reduced) {
 			grp.current.rotation.y = state.clock.elapsedTime * 0.18 + phase * 3;
 		}
@@ -104,12 +113,20 @@ function Piece({
 	return (
 		<group ref={grp} position={position} rotation-z={rotation} scale={scale}>
 			<mesh geometry={geo}>
-				<meshStandardMaterial
+				{/*
+					Real glass: transparency comes from transmission, not opacity,
+					so refraction and the amber body tint fall out of the physics.
+				*/}
+				<meshPhysicalMaterial
 					ref={mat}
-					transparent
-					opacity={0.6}
-					roughness={0.08}
-					metalness={0.05}
+					transmission={0.92}
+					thickness={0.7}
+					roughness={0.07}
+					ior={1.5}
+					clearcoat={0.6}
+					clearcoatRoughness={0.25}
+					attenuationColor="#C9B481"
+					attenuationDistance={2.5}
 					side={THREE.DoubleSide}
 					toneMapped={false}
 				/>
@@ -117,6 +134,18 @@ function Piece({
 			<mesh ref={halo}>
 				<sphereGeometry args={[1.1, 20, 20]} />
 				<meshBasicMaterial
+					color={C.u235}
+					transparent
+					opacity={0}
+					depthWrite={false}
+					toneMapped={false}
+				/>
+			</mesh>
+			{/* Soft pool of re-emitted green on the shelf under a lit piece. */}
+			<mesh rotation-x={-Math.PI / 2} position-y={poolY}>
+				<circleGeometry args={[0.95, 32]} />
+				<meshBasicMaterial
+					ref={pool}
 					color={C.u235}
 					transparent
 					opacity={0}
@@ -151,9 +180,18 @@ function Lamp({
 				<meshStandardMaterial
 					color="#B39CFF"
 					emissive="#8A6CFF"
-					emissiveIntensity={2.2}
+					emissiveIntensity={3.0}
 					toneMapped={false}
 				/>
+			</mesh>
+			{/* Metal end caps so the tube reads as a fixture, not a bare glow. */}
+			<mesh position={[-0.86, 0, 0]} rotation-z={Math.PI / 2}>
+				<cylinderGeometry args={[0.1, 0.1, 0.14, 12]} />
+				<meshStandardMaterial color="#6B7280" roughness={0.35} metalness={0.9} />
+			</mesh>
+			<mesh position={[0.86, 0, 0]} rotation-z={Math.PI / 2}>
+				<cylinderGeometry args={[0.1, 0.1, 0.14, 12]} />
+				<meshStandardMaterial color="#6B7280" roughness={0.35} metalness={0.9} />
 			</mesh>
 			<pointLight color="#9B7BFF" intensity={22} distance={9} decay={2} />
 		</group>
@@ -217,7 +255,7 @@ export default function GlassScene({ reduced }: { reduced: boolean }) {
 			{/* Shelf */}
 			<mesh position={[0, -1.62, 0]} receiveShadow>
 				<boxGeometry args={[13, 0.16, 3.2]} />
-				<meshStandardMaterial color="#2B3140" roughness={0.85} metalness={0.2} />
+				<meshStandardMaterial color="#2B3140" roughness={0.4} metalness={0.45} />
 			</mesh>
 		</>
 	);

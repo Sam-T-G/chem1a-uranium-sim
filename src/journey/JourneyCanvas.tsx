@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 import type { ChapterId } from "./chapters";
+import Effects from "../three/Effects";
 import IntroScene from "./scenes/IntroScene";
 import GlassScene from "./scenes/GlassScene";
 import NameScene from "./scenes/NameScene";
@@ -23,7 +24,7 @@ const VIEWS: Record<ChapterId, [number, number, number]> = {
 	name: [0, 0.8, 9.2],
 	berlin: [0, 1.0, 9.0],
 	problem: [0, 0, 12],
-	oakridge: [0, 6.5, 21],
+	oakridge: [0, 4.2, 20],
 	line: [3.4, 1.1, 11.5],
 	handoff: [0, 2.2, 8.4],
 };
@@ -49,9 +50,14 @@ function Scene({ id, reduced }: { id: ChapterId; reduced: boolean }) {
 	}
 }
 
-/** Eases the camera between chapter framings instead of cutting. */
+/**
+ * Eases the camera between chapter framings, with a whisper of pointer
+ * parallax so the scenes feel inhabited rather than printed. The parallax
+ * moves the look-target, not the camera, so framing stays intact.
+ */
 function CameraRig({ chapter, reduced }: { chapter: ChapterId; reduced: boolean }) {
 	const target = useRef(new THREE.Vector3(...VIEWS[chapter]));
+	const look = useRef(new THREE.Vector3(0, 0, 0));
 	const { camera } = useThree();
 
 	useEffect(() => {
@@ -59,10 +65,12 @@ function CameraRig({ chapter, reduced }: { chapter: ChapterId; reduced: boolean 
 		if (reduced) camera.position.copy(target.current);
 	}, [chapter, camera, reduced]);
 
-	useFrame((_, dt) => {
+	useFrame((state, dt) => {
 		if (reduced) return;
 		camera.position.lerp(target.current, Math.min(1, dt * 1.7));
-		camera.lookAt(0, 0, 0);
+		look.current.x += (state.pointer.x * 0.55 - look.current.x) * Math.min(1, dt * 2.2);
+		look.current.y += (state.pointer.y * 0.3 - look.current.y) * Math.min(1, dt * 2.2);
+		camera.lookAt(look.current);
 	});
 
 	return null;
@@ -71,15 +79,33 @@ function CameraRig({ chapter, reduced }: { chapter: ChapterId; reduced: boolean 
 export default function JourneyCanvas({
 	chapter,
 	reduced,
+	eventSource,
 }: {
 	chapter: ChapterId;
 	reduced: boolean;
+	/** The scroll overlay sits above the canvas, so pointer events for the
+	    parallax have to be sourced from the root element instead. */
+	eventSource: React.RefObject<HTMLElement | null>;
 }) {
 	return (
 		<Canvas
 			dpr={[1, 2]}
 			camera={{ position: VIEWS.intro, fov: 42 }}
-			gl={{ antialias: true }}
+			// Anti-aliasing comes from the composer's multisampling; asking the
+			// default framebuffer for it too allocates and resolves a second MSAA
+			// buffer that only ever receives the final full-screen quad.
+			gl={{ antialias: false }}
+			// Under reduced motion every scene here is a still, so idle frames are
+			// pure waste. R3F invalidates on mount and on React updates, which is
+			// exactly when these scenes change.
+			frameloop={reduced ? "demand" : "always"}
+			eventSource={eventSource as React.RefObject<HTMLElement>}
+			eventPrefix="client"
+			onCreated={({ gl }) => {
+				// Transmission re-renders the scene into an offscreen target every
+				// frame. It is refractive blur, so half resolution is free quality.
+				gl.transmissionResolutionScale = 0.5;
+			}}
 		>
 			<color attach="background" args={["#0B0E14"]} />
 			<fog attach="fog" args={["#0B0E14", 16, 52]} />
@@ -91,6 +117,7 @@ export default function JourneyCanvas({
 				</group>
 			</Suspense>
 			<CameraRig chapter={chapter} reduced={reduced} />
+			<Effects />
 		</Canvas>
 	);
 }

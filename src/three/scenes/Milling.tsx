@@ -28,11 +28,14 @@ function Conveyor({ reduced }: { reduced: boolean }) {
 	useFrame((state, dt) => {
 		if (!ref.current) return;
 		const speed = reduced ? 0 : 0.16;
+		// Tumble has to freeze too, or the chunks spin in place for anyone who
+		// asked for reduced motion.
+		const spin = reduced ? 0 : state.clock.elapsedTime * 0.6;
 		seeds.forEach((sd, i) => {
 			sd.t = (sd.t + speed * dt) % 1;
 			const x = -7.5 + sd.t * 4.2;
 			dummy.position.set(x, 0.75, sd.z);
-			dummy.rotation.set(sd.rx + state.clock.elapsedTime * 0.6, sd.ry, 0);
+			dummy.rotation.set(sd.rx + spin, sd.ry, 0);
 			dummy.scale.setScalar(sd.s * (1 - sd.t * 0.35));
 			dummy.updateMatrix();
 			ref.current!.setMatrixAt(i, dummy.matrix);
@@ -56,13 +59,21 @@ function Conveyor({ reduced }: { reduced: boolean }) {
 
 function LeachTank({ reduced }: { reduced: boolean }) {
 	const liquid = useRef<THREE.Mesh>(null);
+	const liquorMat = useRef<THREE.MeshStandardMaterial>(null);
 	const stirrer = useRef<THREE.Group>(null);
 
 	useFrame((state, dt) => {
+		const t = state.clock.elapsedTime;
 		if (stirrer.current && !reduced) stirrer.current.rotation.y += dt * 2.4;
 		if (liquid.current && !reduced) {
-			const t = state.clock.elapsedTime;
 			liquid.current.position.y = 0.72 + Math.sin(t * 1.7) * 0.015;
+		}
+		if (liquorMat.current) {
+			// Slow shimmer as the stirrer works the surface. Stays under the
+			// bloom threshold: the liquor is warm, not radiant.
+			liquorMat.current.emissiveIntensity = reduced
+				? 0.55
+				: 0.55 + Math.sin(t * 1.3) * 0.12;
 		}
 	});
 
@@ -87,9 +98,10 @@ function LeachTank({ reduced }: { reduced: boolean }) {
 			<mesh ref={liquid} position={[0, 0.72, 0]}>
 				<cylinderGeometry args={[1.44, 1.44, 0.06, 40]} />
 				<meshStandardMaterial
+					ref={liquorMat}
 					color={C.cake}
 					emissive={C.cake}
-					emissiveIntensity={0.32}
+					emissiveIntensity={0.55}
 					roughness={0.25}
 					metalness={0.1}
 				/>
@@ -110,6 +122,61 @@ function LeachTank({ reduced }: { reduced: boolean }) {
 				</mesh>
 			</group>
 		</group>
+	);
+}
+
+/**
+ * Dust kicked up where ore drops off the conveyor end. Exaggerated for
+ * legibility: real mills wet the ore down precisely to suppress this.
+ */
+function Dust({ reduced }: { reduced: boolean }) {
+	const ref = useRef<THREE.InstancedMesh>(null);
+	const N = 18;
+	const seeds = useMemo(() => {
+		const rnd = mulberry32(431);
+		return Array.from({ length: N }, () => ({
+			phase: rnd(),
+			a: (rnd() - 0.5) * 1.8, // spill direction, biased along the belt (+x)
+			r: 0.2 + rnd() * 0.35,
+			h: 0.22 + rnd() * 0.18,
+			z: (rnd() - 0.5) * 0.5,
+			s: 0.05 + rnd() * 0.045,
+		}));
+	}, []);
+
+	useFrame((state) => {
+		if (!ref.current) return;
+		const t = state.clock.elapsedTime / 1.2;
+		seeds.forEach((sd, i) => {
+			const u = (t + sd.phase) % 1;
+			const out = sd.r * u;
+			dummy.position.set(
+				-3.3 + Math.cos(sd.a) * out,
+				// Rises a little, then drops below the belt lip by end of life.
+				0.66 + sd.h * (1.1 * u - 1.9 * u * u),
+				sd.z + Math.sin(sd.a) * out,
+			);
+			dummy.rotation.set(0, 0, 0);
+			// Grows as it disperses, shrinks to nothing so the loop never pops.
+			dummy.scale.setScalar(sd.s * (0.5 + u * 1.4) * (1 - u));
+			dummy.updateMatrix();
+			ref.current!.setMatrixAt(i, dummy.matrix);
+		});
+		ref.current.instanceMatrix.needsUpdate = true;
+	});
+
+	if (reduced) return null;
+	return (
+		<instancedMesh ref={ref} args={[undefined, undefined, N]} frustumCulled={false}>
+			<sphereGeometry args={[1, 6, 5]} />
+			<meshStandardMaterial
+				color="#3A3D46"
+				roughness={1}
+				transparent
+				opacity={0.5}
+				depthWrite={false}
+			/>
+		</instancedMesh>
 	);
 }
 
@@ -149,10 +216,14 @@ function Pour({ reduced }: { reduced: boolean }) {
 	return (
 		<instancedMesh ref={ref} args={[undefined, undefined, N]} frustumCulled={false}>
 			<sphereGeometry args={[1, 5, 5]} />
+			{/*
+				Bright enough to bloom gently. Editorial, not physical: yellowcake
+				is a matte powder — the glow marks the product stream, nothing more.
+			*/}
 			<meshStandardMaterial
 				color={C.cake}
 				emissive={C.cake}
-				emissiveIntensity={0.45}
+				emissiveIntensity={1.8}
 				roughness={0.6}
 				toneMapped={false}
 			/>
@@ -178,7 +249,7 @@ function Drum() {
 				<meshStandardMaterial
 					color={C.cake}
 					emissive={C.cake}
-					emissiveIntensity={0.4}
+					emissiveIntensity={0.75}
 					roughness={0.85}
 				/>
 			</mesh>
@@ -220,6 +291,7 @@ export default function Milling({ reduced }: { reduced: boolean }) {
 			{/* Line runs -7.5 to +4.5, so shift right to sit centred in frame. */}
 			<group position={[0.4, -0.4, 0]}>
 				<Conveyor reduced={reduced} />
+				<Dust reduced={reduced} />
 				<LeachTank reduced={reduced} />
 				<Duct />
 				<Pour reduced={reduced} />

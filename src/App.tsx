@@ -18,6 +18,36 @@ import AssayLadder, { AssayChip } from "./ui/AssayLadder";
 import ProcessRail from "./ui/ProcessRail";
 import { EnrichmentControls, FissionControls } from "./ui/Controls";
 import Journey from "./journey/Journey";
+import Effects from "./three/Effects";
+
+/**
+ * Boot veil over the first paint: the monogram holds while fonts and the GL
+ * context settle, then the whole thing dissolves. Removed from the DOM once
+ * the fade finishes so it costs nothing afterward.
+ */
+function Boot() {
+	const [phase, setPhase] = useState<"hold" | "fade" | "gone">("hold");
+
+	useEffect(() => {
+		const t1 = window.setTimeout(() => setPhase("fade"), 900);
+		const t2 = window.setTimeout(() => setPhase("gone"), 1800);
+		return () => {
+			window.clearTimeout(t1);
+			window.clearTimeout(t2);
+		};
+	}, []);
+
+	if (phase === "gone") return null;
+	return (
+		<div className={`boot${phase === "fade" ? " is-fading" : ""}`} aria-hidden="true">
+			<div className="boot-mark">
+				<sup>235</sup>U
+			</div>
+			<div className="boot-line" />
+			<div className="boot-label">The rock nobody wanted</div>
+		</div>
+	);
+}
 
 /** Camera framing per stage, since the scenes differ a lot in scale. */
 const VIEWS: Record<
@@ -90,7 +120,12 @@ export default function App() {
 		return () => mq.removeEventListener("change", apply);
 	}, [setReducedMotion]);
 
-	return mode === "journey" ? <Journey /> : <Simulation />;
+	return (
+		<>
+			<Boot />
+			{mode === "journey" ? <Journey /> : <Simulation />}
+		</>
+	);
 }
 
 function Simulation() {
@@ -102,6 +137,16 @@ function Simulation() {
 	const setMode = useSim((s) => s.setMode);
 	const next = useSim((s) => s.next);
 	const prev = useSim((s) => s.prev);
+
+	// Mirror of the journey's exit: cross-fade back into the story.
+	const backToStory = useCallback(() => {
+		const go = () => setMode("journey");
+		if (!reduced && "startViewTransition" in document) {
+			(
+				document as Document & { startViewTransition: (cb: () => void) => void }
+			).startViewTransition(go);
+		} else go();
+	}, [setMode, reduced]);
 
 	const info = STAGES[stage];
 	const shownAssay = assayAtStage(stage, rawAssay);
@@ -164,7 +209,7 @@ function Simulation() {
 				<button
 					type="button"
 					className="head-back"
-					onClick={() => setMode("journey")}
+					onClick={backToStory}
 					aria-label="Back to the story"
 				>
 					←
@@ -184,13 +229,20 @@ function Simulation() {
 					<Canvas
 						dpr={[1, 2]}
 						camera={{ position: VIEWS[stage].pos, fov: 42 }}
-						gl={{ antialias: true }}
+						// The composer's multisampling is the only anti-aliasing that
+						// reaches the image; a second MSAA default framebuffer would be
+						// allocated and resolved every frame for nothing.
+						gl={{ antialias: false }}
 					>
 						<color attach="background" args={["#0B0E14"]} />
 						<fog attach="fog" args={["#0B0E14", 20, 62]} />
 						<Suspense fallback={null}>{scene}</Suspense>
 						<CameraRig stage={stage} />
+						<Effects />
 					</Canvas>
+
+					{/* Dissolve on stage change, matching the journey's cuts. */}
+					{!reduced && <div key={stage} className="canvas-veil" />}
 
 					{legend && (
 						<div className="legend">
@@ -209,6 +261,10 @@ function Simulation() {
 				</div>
 
 				<aside className="panel">
+					<div className="panel-inner" key={stage}>
+					<span className="panel-ghost" aria-hidden="true">
+						{info.index}
+					</span>
 					<div className="panel-eyebrow">
 						<b>{info.index}</b>
 						<span>{info.label}</span>
@@ -246,6 +302,7 @@ function Simulation() {
 							stage. Nothing before enrichment changes the isotope ratio.
 						</p>
 					)}
+					</div>
 				</aside>
 			</div>
 

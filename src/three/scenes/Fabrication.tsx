@@ -15,11 +15,29 @@ const PELLET_H = 0.5;
 /**
  * Pellets are a pale sintered ceramic. The fissile fraction is shown by tinting
  * that ceramic toward the U-235 colour, so the same encoding used everywhere
- * else still applies without pretending real pellets glow green.
+ * else still applies without pretending real pellets glow green. The scale
+ * factor pushes high-assay tints past 1.0 so the bloom pass picks them up:
+ * near-natural stacks stay matte, high-assay stacks carry a faint halo. That
+ * halo is the encoding, not physics — real pellets look the same at any assay.
  */
 const CERAMIC = new THREE.Color("#A79E90");
 function pelletColor(assay: number): THREE.Color {
-	return CERAMIC.clone().lerp(new THREE.Color(C.u235), Math.min(assay * 1.1, 0.85));
+	return CERAMIC.clone()
+		.lerp(new THREE.Color(C.u235), Math.min(assay * 1.1, 0.85))
+		.multiplyScalar(1 + assay * 1.6);
+}
+
+/**
+ * Per-pellet brightness variance. Basic materials ignore lighting, so without
+ * this every pellet in a stack is the identical flat colour and the stack reads
+ * as one extrusion. Sintered ceramic genuinely varies batch to batch.
+ */
+function pelletTints(assay: number, n: number, seed: number): THREE.Color[] {
+	const rnd = mulberry32(seed);
+	const base = pelletColor(assay);
+	return Array.from({ length: n }, () =>
+		base.clone().multiplyScalar(0.92 + rnd() * 0.13),
+	);
 }
 
 /** Pellets travelling down the line and stacking into the rod. */
@@ -32,22 +50,36 @@ function Line({ assay, reduced }: { assay: number; reduced: boolean }) {
 		() => Array.from({ length: N }, (_, i) => ({ t: i / N })),
 		[],
 	);
+	const tints = useMemo(() => pelletTints(assay, N, 4242), [assay]);
+
+	// Colours and the initial (reduced-mode) placement are set once here;
+	// useFrame only rewrites matrices, so nothing allocates per frame.
+	useLayoutEffect(() => {
+		if (!ref.current) return;
+		for (let i = 0; i < N; i++) {
+			dummy.position.set(-5.2 + seeds[i].t * 4.4, 1.6, 0);
+			dummy.rotation.set(Math.PI / 2, 0, 0);
+			dummy.scale.setScalar(1);
+			dummy.updateMatrix();
+			ref.current.setMatrixAt(i, dummy.matrix);
+			ref.current.setColorAt(i, tints[i]);
+		}
+		ref.current.instanceMatrix.needsUpdate = true;
+		if (ref.current.instanceColor) ref.current.instanceColor.needsUpdate = true;
+	}, [tints, seeds]);
 
 	useFrame((_, dt) => {
-		if (!ref.current) return;
-		const glow = pelletColor(assay);
+		if (!ref.current || reduced) return;
 		for (let i = 0; i < N; i++) {
 			const s = seeds[i];
-			if (!reduced) s.t = (s.t + dt * 0.12) % 1;
+			s.t = (s.t + dt * 0.12) % 1;
 			dummy.position.set(-5.2 + s.t * 4.4, 1.6, 0);
 			dummy.rotation.set(Math.PI / 2, 0, 0);
 			dummy.scale.setScalar(1);
 			dummy.updateMatrix();
 			ref.current.setMatrixAt(i, dummy.matrix);
-			ref.current.setColorAt(i, glow);
 		}
 		ref.current.instanceMatrix.needsUpdate = true;
-		if (ref.current.instanceColor) ref.current.instanceColor.needsUpdate = true;
 	});
 
 	return (
@@ -56,9 +88,11 @@ function Line({ assay, reduced }: { assay: number; reduced: boolean }) {
 				<boxGeometry args={[4.8, 0.12, 1.0]} />
 				<meshStandardMaterial color="#2E3441" metalness={0.5} roughness={0.7} />
 			</mesh>
+			{/* Basic material: instance colours pass through unlit, so HDR tints
+			    survive to the bloom pass instead of being flattened by shading. */}
 			<instancedMesh ref={ref} args={[undefined, undefined, N]} frustumCulled={false}>
 				<cylinderGeometry args={[PELLET_R, PELLET_R, PELLET_H, 24]} />
-				<meshStandardMaterial roughness={0.55} metalness={0.1} toneMapped={false} />
+				<meshBasicMaterial toneMapped={false} />
 			</instancedMesh>
 		</group>
 	);
@@ -71,14 +105,14 @@ function Rod({ assay }: { assay: number }) {
 
 	useLayoutEffect(() => {
 		if (!ref.current) return;
-		const glow = pelletColor(assay);
+		const tints = pelletTints(assay, N, 9173);
 		for (let i = 0; i < N; i++) {
 			dummy.position.set(0.6, -3.1 + i * (PELLET_H + 0.03), 0);
 			dummy.rotation.set(0, 0, 0);
 			dummy.scale.setScalar(1);
 			dummy.updateMatrix();
 			ref.current.setMatrixAt(i, dummy.matrix);
-			ref.current.setColorAt(i, glow);
+			ref.current.setColorAt(i, tints[i]);
 		}
 		ref.current.instanceMatrix.needsUpdate = true;
 		if (ref.current.instanceColor) ref.current.instanceColor.needsUpdate = true;
@@ -88,7 +122,7 @@ function Rod({ assay }: { assay: number }) {
 		<group>
 			<instancedMesh ref={ref} args={[undefined, undefined, N]} frustumCulled={false}>
 				<cylinderGeometry args={[PELLET_R, PELLET_R, PELLET_H, 24]} />
-				<meshStandardMaterial roughness={0.55} metalness={0.1} toneMapped={false} />
+				<meshBasicMaterial toneMapped={false} />
 			</instancedMesh>
 
 			{/* Zircaloy cladding. The open quarter faces the camera so the pellet
@@ -186,6 +220,25 @@ function Press({ reduced }: { reduced: boolean }) {
 				<boxGeometry args={[1.3, 0.5, 1.3]} />
 				<meshStandardMaterial color="#2E3441" metalness={0.5} roughness={0.7} />
 			</mesh>
+
+			{/* Sinter furnace behind the press. Green pellets are fired around
+			    1700 °C; the amber mouth is the one honest light on the shop floor,
+			    and the point light lets it spill onto the press metalwork. */}
+			<mesh position={[0.35, 1.55, -1.2]}>
+				<boxGeometry args={[0.9, 0.5, 0.7]} />
+				<meshStandardMaterial
+					color="#2A2118"
+					emissive="#E8A33D"
+					emissiveIntensity={2.2}
+					toneMapped={false}
+				/>
+			</mesh>
+			<pointLight
+				position={[0.35, 1.7, -0.7]}
+				color={C.cake}
+				intensity={6}
+				distance={5}
+			/>
 		</group>
 	);
 }

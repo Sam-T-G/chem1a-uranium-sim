@@ -16,13 +16,63 @@ function inline(text: string, keyBase: string) {
 	});
 }
 
+/**
+ * Count-up for the chapter stat. Runs once when the chapter card reveals,
+ * eases out, and preserves the value's decimal precision so "1.0043" ticks
+ * through four decimal places rather than jumping in integers.
+ */
+function AnimatedStat({
+	value,
+	active,
+	reduced,
+}: {
+	value: string;
+	active: boolean;
+	reduced: boolean;
+}) {
+	const target = parseFloat(value);
+	const decimals = value.includes(".") ? value.split(".")[1].length : 0;
+	const [shown, setShown] = useState(reduced ? value : "0");
+	const done = useRef(false);
+
+	useEffect(() => {
+		if (!active || done.current || Number.isNaN(target)) return;
+		if (reduced) {
+			setShown(value);
+			done.current = true;
+			return;
+		}
+		// Marked done only on completion. Setting it up front would strand the
+		// value at 0 whenever the effect is torn down mid-flight (StrictMode's
+		// double-invoke, or reduced motion flipping partway through).
+		const t0 = performance.now();
+		const DUR = 1400;
+		let raf = 0;
+		const tick = (now: number) => {
+			const k = Math.min((now - t0) / DUR, 1);
+			const eased = 1 - Math.pow(1 - k, 3);
+			setShown((target * eased).toFixed(decimals));
+			if (k < 1) raf = requestAnimationFrame(tick);
+			else done.current = true;
+		};
+		raf = requestAnimationFrame(tick);
+		return () => cancelAnimationFrame(raf);
+	}, [active, target, decimals, value, reduced]);
+
+	return <>{Number.isNaN(target) ? value : shown}</>;
+}
+
 export default function Journey() {
 	const reduced = useSim((s) => s.reducedMotion);
 	const setMode = useSim((s) => s.setMode);
 
 	const [active, setActive] = useState<ChapterId>("intro");
 	const [progress, setProgress] = useState(0);
+	const [revealed, setRevealed] = useState<Set<ChapterId>>(
+		() => new Set(["intro"]),
+	);
 	const scroller = useRef<HTMLDivElement>(null);
+	const root = useRef<HTMLDivElement>(null);
 	const sections = useRef<(HTMLElement | null)[]>([]);
 
 	// Active chapter comes from whichever section owns the middle of the viewport.
@@ -47,18 +97,62 @@ export default function Journey() {
 		return () => el.removeEventListener("scroll", onScroll);
 	}, []);
 
-	const jumpTo = useCallback((index: number) => {
-		const s = sections.current[index];
-		const el = scroller.current;
-		if (s && el) el.scrollTo({ top: s.offsetTop, behavior: "smooth" });
+	// Reveal cards once, as they approach the viewport centre.
+	useEffect(() => {
+		const obs = new IntersectionObserver(
+			(entries) => {
+				for (const e of entries) {
+					if (!e.isIntersecting) continue;
+					const id = (e.target as HTMLElement).dataset.chapter as ChapterId;
+					setRevealed((prev) => {
+						if (prev.has(id)) return prev;
+						const next = new Set(prev);
+						next.add(id);
+						return next;
+					});
+					obs.unobserve(e.target);
+				}
+			},
+			{ root: scroller.current, threshold: 0.25 },
+		);
+		sections.current.forEach((s) => s && obs.observe(s));
+		return () => obs.disconnect();
 	}, []);
 
-	const enterSim = useCallback(() => setMode("sim"), [setMode]);
+	const jumpTo = useCallback(
+		(index: number) => {
+			const s = sections.current[index];
+			const el = scroller.current;
+			if (s && el)
+				el.scrollTo({
+					top: s.offsetTop,
+					// "instant" rather than "auto": auto would defer to the
+					// stylesheet's scroll-behavior and animate anyway.
+					behavior: reduced ? "instant" : "smooth",
+				});
+		},
+		[reduced],
+	);
+
+	// Cross-fade the whole document into the simulation where the browser
+	// supports it; plain swap elsewhere.
+	const enterSim = useCallback(() => {
+		const go = () => setMode("sim");
+		if (!reduced && "startViewTransition" in document) {
+			(
+				document as Document & {
+					startViewTransition: (cb: () => void) => void;
+				}
+			).startViewTransition(go);
+		} else go();
+	}, [setMode, reduced]);
 
 	return (
-		<div className="journey">
+		<div className="journey" ref={root}>
 			<div className="journey-bg">
-				<JourneyCanvas chapter={active} reduced={reduced} />
+				<JourneyCanvas chapter={active} reduced={reduced} eventSource={root} />
+				{/* Brief dip on each chapter change so scene cuts read as dissolves. */}
+				{!reduced && <div key={active} className="canvas-veil" />}
 			</div>
 
 			<header className="journey-head">
@@ -76,7 +170,7 @@ export default function Journey() {
 				<span style={{ width: `${progress * 100}%` }} />
 			</div>
 
-			{/* Chapter dots */}
+			{/* Chapter rail: dots with the chapter name surfacing on hover/current. */}
 			<nav className="journey-dots" aria-label="Chapters">
 				{CHAPTERS.map((c, i) => (
 					<button
@@ -85,6 +179,7 @@ export default function Journey() {
 						className="journey-dot"
 						aria-current={active === c.id}
 						aria-label={c.heading}
+						data-label={c.short}
 						onClick={() => jumpTo(i)}
 					/>
 				))}
@@ -94,11 +189,19 @@ export default function Journey() {
 				{CHAPTERS.map((c, i) => (
 					<section
 						key={c.id}
-						className={`chapter chapter--${c.id}`}
+						data-chapter={c.id}
+						className={`chapter chapter--${c.id}${
+							revealed.has(c.id) || reduced ? " is-revealed" : ""
+						}`}
 						ref={(el) => {
 							sections.current[i] = el;
 						}}
 					>
+						{c.index && (
+							<span className="chapter-ghost" aria-hidden="true">
+								{c.index}
+							</span>
+						)}
 						<div className="chapter-card">
 							{c.kicker && <p className="chapter-kicker">{c.kicker}</p>}
 							<h2 className="chapter-heading">{c.heading}</h2>
@@ -113,7 +216,13 @@ export default function Journey() {
 
 							{c.stat && (
 								<div className="chapter-stat">
-									<span className="chapter-stat-value">{c.stat.value}</span>
+									<span className="chapter-stat-value">
+										<AnimatedStat
+											value={c.stat.value}
+											active={revealed.has(c.id)}
+											reduced={reduced}
+										/>
+									</span>
 									<span className="chapter-stat-unit">{c.stat.unit}</span>
 									<p className="chapter-stat-note">{c.stat.note}</p>
 								</div>
@@ -135,6 +244,13 @@ export default function Journey() {
 								</button>
 							)}
 						</div>
+
+						{c.id === "intro" && (
+							<div className="scroll-cue" aria-hidden="true">
+								<span className="scroll-cue-line" />
+								<span className="scroll-cue-label">scroll</span>
+							</div>
+						)}
 					</section>
 				))}
 			</div>

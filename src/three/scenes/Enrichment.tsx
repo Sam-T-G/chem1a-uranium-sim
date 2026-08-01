@@ -8,11 +8,15 @@ import { separationCost } from "../../lib/separation";
 const ROTOR_R = 1.15;
 const ROTOR_H = 5.4;
 
-// Hoisted so the per-frame loops never allocate.
-const COL_U235 = new THREE.Color(C.u235);
-const COL_U238 = new THREE.Color(C.u238);
-const COL_CAKE = new THREE.Color(C.cake);
-const COL_HOT = new THREE.Color(C.hot);
+// Hoisted so the per-frame loops never allocate. Instanced meshes share one
+// material, so per-instance glow has to ride in the instance colour itself:
+// values pushed past 1.0 on an untone-mapped basic material cross the bloom
+// threshold, values under 1.0 never do. U-235 and lit machines glow; U-238
+// and idle machines stay dark.
+const COL_U235_HDR = new THREE.Color(C.u235).multiplyScalar(2.4);
+const COL_U238_LDR = new THREE.Color(C.u238).multiplyScalar(0.9);
+const COL_CAKE_HDR = new THREE.Color(C.cake).multiplyScalar(2.2);
+const COL_HOT_HDR = new THREE.Color(C.hot).multiplyScalar(2.4);
 const COL_OFF = new THREE.Color("#39435A");
 
 /**
@@ -111,7 +115,7 @@ function RotorGas({ reduced, spinning }: { reduced: boolean; spinning: boolean }
 				<meshStandardMaterial
 					color={C.u235}
 					emissive={C.u235}
-					emissiveIntensity={1.5}
+					emissiveIntensity={2.4}
 					toneMapped={false}
 				/>
 			</instancedMesh>
@@ -147,7 +151,7 @@ function RotorShell({ reduced, spinning }: { reduced: boolean; spinning: boolean
 					roughness={0.25}
 					side={THREE.DoubleSide}
 					transparent
-					opacity={0.3}
+					opacity={0.24}
 					depthWrite={false}
 				/>
 			</mesh>
@@ -193,7 +197,7 @@ function Streams({ assay, reduced }: { assay: number; reduced: boolean }) {
 				dummy.scale.setScalar(isU235(i, N, assay) ? 0.075 : 0.055);
 				dummy.updateMatrix();
 				productRef.current.setMatrixAt(i, dummy.matrix);
-				productRef.current.setColorAt(i, isU235(i, N, assay) ? COL_U235 : COL_U238);
+				productRef.current.setColorAt(i, isU235(i, N, assay) ? COL_U235_HDR : COL_U238_LDR);
 			}
 			productRef.current.instanceMatrix.needsUpdate = true;
 			if (productRef.current.instanceColor)
@@ -211,7 +215,7 @@ function Streams({ assay, reduced }: { assay: number; reduced: boolean }) {
 				dummy.scale.setScalar(isU235(i, N, ASSAY.tails) ? 0.075 : 0.055);
 				dummy.updateMatrix();
 				tailsRef.current.setMatrixAt(i, dummy.matrix);
-				tailsRef.current.setColorAt(i, isU235(i, N, ASSAY.tails) ? COL_U235 : COL_U238);
+				tailsRef.current.setColorAt(i, isU235(i, N, ASSAY.tails) ? COL_U235_HDR : COL_U238_LDR);
 			}
 			tailsRef.current.instanceMatrix.needsUpdate = true;
 			if (tailsRef.current.instanceColor)
@@ -221,13 +225,14 @@ function Streams({ assay, reduced }: { assay: number; reduced: boolean }) {
 
 	return (
 		<>
+			{/* Basic material: the instance colour is the emitted light, HDR or not. */}
 			<instancedMesh ref={productRef} args={[undefined, undefined, N]} frustumCulled={false}>
 				<sphereGeometry args={[1, 7, 7]} />
-				<meshStandardMaterial toneMapped={false} emissiveIntensity={0.6} />
+				<meshBasicMaterial toneMapped={false} />
 			</instancedMesh>
 			<instancedMesh ref={tailsRef} args={[undefined, undefined, N]} frustumCulled={false}>
 				<sphereGeometry args={[1, 7, 7]} />
-				<meshStandardMaterial toneMapped={false} emissiveIntensity={0.6} />
+				<meshBasicMaterial toneMapped={false} />
 			</instancedMesh>
 		</>
 	);
@@ -271,7 +276,7 @@ function Cascade({ assay }: { assay: number }) {
 			const r = Math.floor(i / COLS);
 			const order = c * ROWS + r;
 			const on = order < lit;
-			ref.current.setColorAt(i, on ? (hot ? COL_HOT : COL_CAKE) : COL_OFF);
+			ref.current.setColorAt(i, on ? (hot ? COL_HOT_HDR : COL_CAKE_HDR) : COL_OFF);
 		}
 		if (ref.current.instanceColor) ref.current.instanceColor.needsUpdate = true;
 	});
@@ -279,7 +284,11 @@ function Cascade({ assay }: { assay: number }) {
 	return (
 		<instancedMesh ref={ref} args={[undefined, undefined, N]} frustumCulled={false}>
 			<capsuleGeometry args={[0.16, 1.15, 4, 10]} />
-			<meshStandardMaterial toneMapped={false} roughness={0.45} metalness={0.35} />
+			{/*
+				Basic, untone-mapped: lit machines carry HDR instance colours and
+				bloom through the fog; idle machines sit at a flat dark blue-grey.
+			*/}
+			<meshBasicMaterial toneMapped={false} />
 		</instancedMesh>
 	);
 }
