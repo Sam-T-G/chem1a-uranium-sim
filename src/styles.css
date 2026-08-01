@@ -1534,6 +1534,28 @@ sub {
  * panel and got clipped mid-formula, which is worse than useless: the reader
  * cannot tell whether the equation is finished.
  */
+/* Visually hidden but read aloud: the reaction's written sentence. */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* The visual tree is aria-hidden, so it needs to carry the layout itself. */
+.rxn-visual {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	gap: inherit;
+}
+
 .rxn {
 	display: flex;
 	flex-wrap: wrap;

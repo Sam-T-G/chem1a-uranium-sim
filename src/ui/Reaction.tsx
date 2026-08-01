@@ -41,11 +41,7 @@ function Side({ terms }: { terms: Term[] }) {
 		<>
 			{terms.map((t, i) => (
 				<span className="rxn-group" key={`${t.formula}-${i}`}>
-					{i > 0 && (
-						<span className="rxn-op" aria-hidden="true">
-							+
-						</span>
-					)}
+					{i > 0 && <span className="rxn-op">+</span>}
 					<Species term={t} />
 				</span>
 			))}
@@ -63,10 +59,11 @@ export default function ReactionView({
 }) {
 	if (reaction.kind === "relation") {
 		return (
-			<div className="rxn rxn--relation" role="math" aria-label={label}>
-				<div className="rxn-expr">{sci(reaction.expr, "expr")}</div>
+			<div className="rxn rxn--relation" role="math">
+				{label && <span className="sr-only">{label}</span>}
+				<div className="rxn-expr" aria-hidden="true">{sci(reaction.expr, "expr")}</div>
 				{reaction.result && (
-					<div className="rxn-result">
+					<div className="rxn-result" aria-hidden="true">
 						<span className="rxn-result-value">
 							{sci(reaction.result, "res")}
 						</span>
@@ -81,28 +78,28 @@ export default function ReactionView({
 
 	if (reaction.kind === "equation") {
 		return (
-			<div className="rxn rxn--equation" role="math" aria-label={label}>
-				<Side terms={reaction.lhs} />
-				<span className="rxn-arrow" aria-hidden="true">
-					→
+			<div className="rxn rxn--equation" role="math">
+				{label && <span className="sr-only">{label}</span>}
+				<span className="rxn-visual" aria-hidden="true">
+					<Side terms={reaction.lhs} />
+					<span className="rxn-arrow">→</span>
+					<Side terms={reaction.rhs} />
 				</span>
-				<Side terms={reaction.rhs} />
 			</div>
 		);
 	}
 
 	return (
-		<div className="rxn rxn--chain" role="math" aria-label={label}>
-			{reaction.steps.map((t, i) => (
-				<span className="rxn-group" key={`${t.formula}-${i}`}>
-					{i > 0 && (
-						<span className="rxn-arrow rxn-arrow--step" aria-hidden="true">
-							→
-						</span>
-					)}
-					<Species term={t} />
-				</span>
-			))}
+		<div className="rxn rxn--chain" role="math">
+			{label && <span className="sr-only">{label}</span>}
+			<span className="rxn-visual" aria-hidden="true">
+				{reaction.steps.map((t, i) => (
+					<span className="rxn-group" key={`${t.formula}-${i}`}>
+						{i > 0 && <span className="rxn-arrow rxn-arrow--step">→</span>}
+						<Species term={t} />
+					</span>
+				))}
+			</span>
 		</div>
 	);
 }

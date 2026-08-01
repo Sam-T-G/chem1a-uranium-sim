@@ -153,7 +153,7 @@ export const SOURCES: Source[] = [
 		year: "n.d.",
 		url: "https://programs.fas.org/ssp/nukes/fuelcycle/centrifuges/separation_theory.html",
 		kind: "institutional",
-		note: "The physics and mathematics of isotope separation, including separation factors. The technical basis for the Graham's law figure of 1.0043 per gaseous-diffusion stage.",
+		note: "The physics and mathematics of isotope separation: feed, product and tails, separation factors, and how cascades are put together. The 1.0043 figure in this piece is calculated from the two molar masses rather than quoted from here.",
 	},
 	{
 		id: "wna-cycle",
@@ -174,6 +174,16 @@ export const SOURCES: Source[] = [
 		url: "https://world-nuclear.org/information-library/nuclear-fuel-cycle/conversion-enrichment-and-fabrication/conversion-and-deconversion",
 		kind: "institutional",
 		note: "The conversion chemistry in detail: U_{3}O_{8} to UO_{2} to UF_{4} to UF_{6}, and why UF_{6} is the compound the whole industry runs on. Split out from the overview because the overview page does not carry this route step by step.",
+	},
+	{
+		id: "wna-enrichment",
+		author: "World Nuclear Association",
+		title: "Uranium Enrichment",
+		publisher: "world-nuclear.org",
+		year: "n.d.",
+		url: "https://world-nuclear.org/information-library/nuclear-fuel-cycle/conversion-enrichment-and-fabrication/uranium-enrichment",
+		kind: "institutional",
+		note: "How centrifuges actually run: rotor speeds of 50,000 to 70,000 rpm, product and tails drawn off at opposite ends of the rotor, and the fact that a centrifuge cascade is only 10 to 20 stages deep with many machines in parallel at each stage, against a thousand or more stages for gaseous diffusion. Industry body, so reliable on process and not neutral on policy.",
 	},
 	{
 		id: "nps-oakridge",

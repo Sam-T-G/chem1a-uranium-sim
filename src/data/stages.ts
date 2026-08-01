@@ -46,7 +46,7 @@ export const STAGES: Record<StageId, StageInfo> = {
 		figure: {
 			value: "0.72",
 			unit: "% U-235",
-			caption: "Natural abundance, and the same everywhere on Earth.",
+			caption: "Natural abundance, and essentially the same in every deposit on Earth.",
 		},
 	},
 
@@ -57,23 +57,22 @@ export const STAGES: Record<StageId, StageInfo> = {
 		title: "Milling to yellowcake",
 		lede: "Crush it, dissolve it, pull the uranium back out, dry it.",
 		body: [
-			"The ore is crushed and ground, then soaked in sulfuric acid, which dissolves the uranium and leaves most of the rock behind as solid waste. The uranium is then pulled back out of that solution and concentrated.",
+			"The ore is crushed and ground, then soaked in sulfuric acid with an oxidizer mixed in. The oxidizer is necessary: the uranium in the rock is in its +4 form, which does not dissolve, so it first has to be pushed back to +6. Once it is in solution the uranium is pulled back out and concentrated, and most of the rock is left behind as solid waste.",
 			"Drying what comes out gives yellowcake, mostly triuranium octoxide. It is around 80% uranium by mass, and it is the form uranium is actually bought and sold in.[[cite:wna-cycle]]",
 			"None of this touches isotopes. Milling separates uranium from everything that is not uranium, which is ordinary chemistry. The U-235 fraction leaving the mill is the same 0.72% that went in.",
 		],
 		reaction: {
 			kind: "chain",
 			steps: [
-				{ formula: "ore", label: "0.1–15% U" },
-				{ formula: "crush", label: "grind it fine" },
-				{ formula: "H_{2}SO_{4}", label: "dissolve the uranium" },
+				{ formula: "UO_{2}", label: "in the ore · 0.1–15% U" },
+				{ formula: "UO_{2}^{2+}", label: "oxidized, then leached with H_{2}SO_{4}" },
 				{ formula: "U_{3}O_{8}", label: "yellowcake · ~80% U" },
 			],
 		},
 		reactionLabel:
-			"Ore is crushed, dissolved in sulfuric acid, and dried to triuranium octoxide.",
+			"Uranium dioxide in the ore is oxidized to the soluble uranyl ion, leached out with sulfuric acid, and dried to triuranium octoxide.",
 		reactionNote:
-			"Every step here is a chemical separation, so the ratio of U-235 to U-238 does not move.",
+			"Nothing here separates isotopes, so the ratio of U-235 to U-238 does not move.",
 		figure: {
 			value: "~80",
 			unit: "% U by mass",
@@ -88,7 +87,7 @@ export const STAGES: Record<StageId, StageInfo> = {
 		title: "Conversion to UF_{6}",
 		lede: "Enrichment needs a gas, and only one uranium compound will do.",
 		body: [
-			"Yellowcake is converted to uranium dioxide, reacted with hydrogen fluoride to make uranium tetrafluoride, then reacted with more fluorine to make uranium hexafluoride.[[cite:wna-conversion]]",
+			"Yellowcake is converted to uranium dioxide, reacted with hydrogen fluoride to make uranium tetrafluoride, then reacted with fluorine gas to make uranium hexafluoride.[[cite:wna-conversion]]",
 			"UF_{6} is the only uranium compound that becomes a gas at a temperature you can work with. At normal pressure it goes straight from solid to gas without melting first, and it reacts violently with water, which is part of why enrichment plants are hard to build and run.",
 			"Fluorine is a lucky choice for a second reason: it has only one naturally occurring isotope, F-19. So the whole mass difference between the two UF_{6} molecules comes from the uranium. If fluorine came in several isotopes, that difference would be blurred and the separation would be even harder.",
 		],
@@ -98,7 +97,7 @@ export const STAGES: Record<StageId, StageInfo> = {
 				{ formula: "U_{3}O_{8}", label: "yellowcake" },
 				{ formula: "UO_{2}", label: "oxide" },
 				{ formula: "UF_{4}", label: "with HF" },
-				{ formula: "UF_{6}", label: "gas · the enrichment feed" },
+				{ formula: "UF_{6}", label: "with F_{2} · the enrichment feed" },
 			],
 		},
 		reactionLabel:
@@ -120,8 +119,8 @@ export const STAGES: Record<StageId, StageInfo> = {
 		title: "Centrifuge enrichment",
 		lede: "The only stage where the isotope ratio changes.",
 		body: [
-			"A gas centrifuge spins UF_{6} at 50,000 to 70,000 rpm. Spinning that fast throws the heavier U-238 molecules toward the outer wall and leaves the lighter U-235 slightly concentrated nearer the middle. Gas is drawn off separately from the middle and from the wall, so one stream comes out a little richer and the other a little poorer.",
-			"One machine barely moves the number. Thousands are connected so each one feeds the next, and a tiny effect repeated thousands of times becomes a usable one.[[cite:fas-separation]] That is what an enrichment plant is: a way of multiplying a 0.86% mass difference by itself over and over.",
+			"A gas centrifuge spins UF_{6} at 50,000 to 70,000 rpm. Spinning that fast pushes the heavier U-238 molecules toward the outer wall and leaves the lighter U-235 slightly concentrated nearer the middle. A slow circulation along the length of the rotor stretches that small difference from one end to the other, and the gas is tapped at the two ends: slightly enriched at one, slightly depleted at the other.[[cite:wna-enrichment]]",
+			"One machine barely moves the number, so they are connected in a cascade with each stage feeding the next. A centrifuge separates well enough that the cascade only needs to be about ten to twenty stages deep. The thousands of machines in a plant mostly sit side by side within those stages, which sets how much uranium the plant can get through rather than how enriched it ends up.[[cite:wna-enrichment]][[cite:fas-separation]]",
 			"The same setup makes reactor fuel and weapons material. Nothing about the machines changes between 5% and 90%, you just keep running them. That is why treaties count centrifuges and check enrichment levels rather than restricting uranium ore, which is common.[[cite:iaea-npt]][[cite:armscontrol-enrich]]",
 		],
 		reaction: {
@@ -176,7 +175,7 @@ export const STAGES: Record<StageId, StageInfo> = {
 		lede: "What all the separation was for.",
 		body: [
 			"When U-235 absorbs a slow neutron, the nucleus becomes unstable enough to split. It breaks into two smaller nuclei and throws out two or three more neutrons.[[cite:openstax]] If more than one of those goes on to split another nucleus, the reaction keeps itself going.",
-			"U-238 will not do this with slow neutrons. U-235 has an odd number of neutrons, so an incoming neutron pairs up with the odd one, and the energy released by that pairing is enough on its own to split the nucleus. U-238 has an even number, gains nothing from pairing, and needs a much faster neutron instead. Reactors deliberately slow their neutrons down, so U-238 mostly just absorbs them and becomes plutonium-239.[[cite:openstax]]",
+			"U-238 will not do this with slow neutrons. U-235 has an odd number of neutrons, so an incoming neutron pairs up with the odd one, and the extra energy released by that pairing is what pushes the nucleus over the threshold where it splits. U-238 has an even number, gains nothing from pairing, and needs a much faster neutron instead. Reactors deliberately slow their neutrons down, so U-238 mostly just absorbs them and becomes plutonium-239.[[cite:openstax]]",
 			"Each fission releases roughly 200 MeV. Breaking a chemical bond releases a few electronvolts. That is a factor of about a hundred million, and it is why a 0.72% isotopic accident ended up reorganizing twentieth-century politics.[[cite:aps-fission]]",
 		],
 		reaction: {
