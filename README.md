@@ -37,17 +37,23 @@ Six stages, navigable from the rail at the bottom or with the ← → arrow keys
 
 The argument the whole thing is built around: **U-235 and U-238 are chemically identical, so nothing in ordinary chemistry separates them.** The only handle is a 1.3% difference between the isotopes themselves (0.86% once they are inside UF₆), and the cost of exploiting it is what turned an isotopic accident into an object of international law.
 
-### The assay ladder
+### The assay scale
 
-The log-scaled axis on the right of the canvas is present on every stage and never moves. It marks 0.25% tails, 0.72% natural, 5% reactor fuel, the 20% IAEA HEU line, and 90% weapons-grade. Everything else in the simulation is downstream of where that marker sits.
+The log-scaled axis on the right of the canvas is present on every stage and never moves. It marks 0.25% tails, 0.72% natural, 5% reactor fuel, the 20% IAEA HEU line, and 90% weapons-grade. Everything else in the simulation is downstream of where the handle sits.
+
+From stage 04 onward the scale is the control: drag the handle, click a labelled value, or focus it and use the arrow keys. Before stage 04 it is locked at natural, and says where the setting lives. The panel carries the same control as a slider, marked with the same values, for stages where the scale is too narrow to aim at.
+
+Both controls click onto the labelled values. Without that, a drag settles at 19.96%, which prints as "20%" but is not over the threshold, and the reading contradicts the state at exactly the line the piece is about.
 
 Cross the 20% line and the interface turns vermilion. That color appears nowhere else.
 
-### The two interactive stages
+### The three stages that react to it
 
 **Stage 04** sets the target assay. The readout gives feed, tails and separative work per kilogram of product, and the cascade behind the rotor lights in proportion to the work required. Raising the target from 4.5% to 60% lights most of the hall; the last stretch to 90% adds comparatively little. That asymmetry is the reason enrichment ceilings sit where they do in negotiated agreements.
 
-**Stage 06** builds a nucleus lattice at whatever assay stage 04 left behind, then induces one fission at the center. At 0.72% the released neutrons are captured by U-238 and the chain dies in a generation or two. At 90% nearly every neutron finds another U-235. Same lattice, same rules, one variable.
+**Stage 05** tints the pellets by enrichment. That is an encoding, not physics: real fuel pellets look the same at any assay.
+
+**Stage 06** builds a nucleus lattice at the current assay, then induces one fission at the center. At 0.72% the released neutrons are captured by U-238 and the chain dies in a generation or two. At 90% nearly every neutron finds another U-235. Same lattice, same rules, one variable. The counts live on the canvas beside the lattice rather than in the panel, and the control sits in a dock pinned to the top of the panel, so changing the assay and firing again never means scrolling away from the scene.
 
 ## What is modeled and what is not
 

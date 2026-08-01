@@ -79,5 +79,11 @@ export function fmtAssay(assay: number): string {
 	const pct = assay * 100;
 	if (pct < 1) return pct.toFixed(2);
 	if (pct < 10) return pct.toFixed(1);
+	// Rounding must never print a number that reads as over the 20% line while
+	// the value is under it. That is the one threshold everything else turns on,
+	// and a readout of "20%" next to an unlit threshold state contradicts itself.
+	const line = ASSAY.haleu * 100;
+	if (pct < line && Math.round(pct) >= line)
+		return (Math.floor(pct * 10) / 10).toFixed(1);
 	return pct.toFixed(0);
 }

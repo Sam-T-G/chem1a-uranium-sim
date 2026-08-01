@@ -3,7 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
-import { ASSAY, C, DPR } from "./theme";
+import { ASSAY, C, COARSE, DPR } from "./theme";
 import { STAGES } from "./data/stages";
 import { assayAtStage, STAGE_ORDER, useSim, type StageId } from "./store";
 
@@ -16,7 +16,14 @@ import Fission from "./three/scenes/Fission";
 
 import AssayLadder, { AssayChip } from "./ui/AssayLadder";
 import ProcessRail from "./ui/ProcessRail";
-import { EnrichmentControls, FissionControls } from "./ui/Controls";
+import {
+	AssayControl,
+	EnrichmentDetail,
+	FabricationDetail,
+	FissionControls,
+	FissionDetail,
+	FissionHud,
+} from "./ui/Controls";
 import Journey from "./journey/Journey";
 import Effects from "./three/Effects";
 import AdaptiveQuality from "./three/AdaptiveQuality";
@@ -140,6 +147,7 @@ function Simulation() {
 	const firing = useSim((s) => s.firing);
 	const reduced = useSim((s) => s.reducedMotion);
 	const setMode = useSim((s) => s.setMode);
+	const setFiring = useSim((s) => s.setFiring);
 	const next = useSim((s) => s.next);
 	const prev = useSim((s) => s.prev);
 
@@ -170,14 +178,23 @@ function Simulation() {
 
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => {
-			// Leave arrow keys alone while the assay slider has focus.
-			if (document.activeElement instanceof HTMLInputElement) return;
+			// Both controls for the assay claim the arrow keys while focused: the
+			// panel slider is an input, the scale over the canvas is a slider role.
+			const el = document.activeElement;
+			if (el instanceof HTMLInputElement || el?.getAttribute("role") === "slider")
+				return;
 			if (e.key === "ArrowRight") next();
 			if (e.key === "ArrowLeft") prev();
+			// Space arms the chain reaction, unless a button already has focus and
+			// would be pressed by it.
+			if (e.key === " " && stage === "fission" && !(el instanceof HTMLButtonElement)) {
+				e.preventDefault();
+				setFiring(!firing);
+			}
 		};
 		window.addEventListener("keydown", onKey);
 		return () => window.removeEventListener("keydown", onKey);
-	}, [next, prev]);
+	}, [next, prev, stage, firing, setFiring]);
 
 	const legend = LEGENDS[stage];
 
@@ -208,6 +225,16 @@ function Simulation() {
 	const preEnrichment =
 		STAGE_ORDER.indexOf(stage) < STAGE_ORDER.indexOf("enrichment");
 
+	// Two scroll containers: the panel scrolls on its own at desk width, the
+	// whole stage area scrolls under a sticky canvas on a phone. Either way a
+	// stage change used to leave the reader wherever the last one had scrolled to.
+	const panelRef = useRef<HTMLElement>(null);
+	const areaRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		panelRef.current?.scrollTo({ top: 0 });
+		areaRef.current?.scrollTo({ top: 0 });
+	}, [stage]);
+
 	return (
 		<div className="app">
 			<header className="head">
@@ -226,10 +253,10 @@ function Simulation() {
 					stage {STAGE_ORDER.indexOf(stage) + 1} of {STAGE_ORDER.length} · {sci(info.title, `${stage}-head`)}
 				</div>
 				<div className="head-spacer" />
-				<AssayChip assay={shownAssay} />
+				<AssayChip assay={shownAssay} live={!preEnrichment} />
 			</header>
 
-			<div className="stage-area">
+			<div className="stage-area" ref={areaRef}>
 				<div className="canvas-wrap">
 					<Canvas
 						dpr={DPR}
@@ -250,23 +277,35 @@ function Simulation() {
 					{/* Dissolve on stage change, matching the journey's cuts. */}
 					{!reduced && <div key={stage} className="canvas-veil" />}
 
-					{legend && (
-						<div className="legend">
-							{legend.map((l) => (
-								<i key={l.text} style={{ "--dot": l.dot } as React.CSSProperties}>
-									{sci(l.text, l.text)}
-								</i>
-							))}
-						</div>
-					)}
+					<div className="canvas-chrome">
+						{legend && (
+							<div className="legend">
+								{legend.map((l) => (
+									<i key={l.text} style={{ "--dot": l.dot } as React.CSSProperties}>
+										{sci(l.text, l.text)}
+									</i>
+								))}
+							</div>
+						)}
+						{/* Live counts belong beside the lattice they are counting, not in
+						    a panel the reader has to look away to read. */}
+						{stage === "fission" && <FissionHud stats={fissionStats} />}
+					</div>
 
-					<AssayLadder assay={shownAssay} />
+					<AssayLadder assay={shownAssay} live={!preEnrichment} />
 					<div className="canvas-hint">
-						drag to orbit · scroll to zoom · ← → stages
+						{COARSE ? (
+							<>drag to orbit · pinch to zoom</>
+						) : (
+							<>
+								drag to orbit · scroll to zoom ·{" "}
+								{stage === "fission" ? "space to fire" : "← → stages"}
+							</>
+						)}
 					</div>
 				</div>
 
-				<aside className="panel">
+				<aside className="panel" ref={panelRef}>
 					<div className="panel-inner" key={stage}>
 					<span className="panel-ghost" aria-hidden="true">
 						{info.index}
@@ -277,6 +316,19 @@ function Simulation() {
 					</div>
 					<h1 className="panel-title">{sci(info.title, `${stage}-title`)}</h1>
 					<p className="panel-lede">{inline(info.lede, `${stage}-lede`)}</p>
+
+					{/* What you can change sits above what there is to read, and stays
+					    pinned there, so the controls are never a scroll away from the
+					    scene they are driving. */}
+					{!preEnrichment && (
+						<div className="panel-dock">
+							{stage === "fission" ? (
+								<FissionControls stats={fissionStats} />
+							) : (
+								<AssayControl />
+							)}
+						</div>
+					)}
 
 					<div className="panel-body">
 						{info.body.map((p, i) => (
@@ -293,8 +345,9 @@ function Simulation() {
 						</div>
 					)}
 
-					{stage === "enrichment" && <EnrichmentControls />}
-					{stage === "fission" && <FissionControls stats={fissionStats} />}
+					{stage === "enrichment" && <EnrichmentDetail />}
+					{stage === "fabrication" && <FabricationDetail />}
+					{stage === "fission" && <FissionDetail />}
 
 					{info.figure && (
 						<div className="figure">

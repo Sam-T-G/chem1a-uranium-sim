@@ -31,8 +31,10 @@ interface SimState {
 	mode: Mode;
 	quality: Quality;
 	stage: StageId;
-	/** Product assay as a mass fraction of U-235. Only the enrichment stage changes it. */
+	/** Product assay as a mass fraction of U-235. Fixed at natural before enrichment. */
 	assay: number;
+	/** True once the reader has moved the control, so the drag hint can retire. */
+	assayTouched: boolean;
 	/** Cascade running, which drives the centrifuge animation. */
 	spinning: boolean;
 	/** Chain reaction armed in the fission stage. */
@@ -56,6 +58,7 @@ export const useSim = create<SimState>((set, get) => ({
 	quality: "high",
 	stage: "ore",
 	assay: ASSAY.natural,
+	assayTouched: false,
 	spinning: true,
 	firing: false,
 	reducedMotion: false,
@@ -72,7 +75,7 @@ export const useSim = create<SimState>((set, get) => ({
 		const i = STAGE_ORDER.indexOf(get().stage);
 		if (i > 0) set({ stage: STAGE_ORDER[i - 1], firing: false });
 	},
-	setAssay: (assay) => set({ assay }),
+	setAssay: (assay) => set({ assay, assayTouched: true }),
 	setSpinning: (spinning) => set({ spinning }),
 	setFiring: (firing) => set({ firing }),
 	setReducedMotion: (reducedMotion) => set({ reducedMotion }),

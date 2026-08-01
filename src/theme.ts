@@ -32,6 +32,11 @@ export const ASSAY = {
 	weapons: 0.9, // conventionally "weapons-grade"
 } as const;
 
+/** Touch or pen rather than a mouse, which changes what the hints can say. */
+export const COARSE =
+	typeof window !== "undefined" &&
+	window.matchMedia("(pointer: coarse)").matches;
+
 /**
  * Device pixel ratio ceiling. Retina phones report 3, which on top of the
  * bloom chain and (in the glass chapter) a transmission pre-pass means a
