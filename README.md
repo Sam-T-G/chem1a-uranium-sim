@@ -16,7 +16,7 @@ A scroll-through explainer that ends inside a working simulation of the fuel cyc
 | 03 | The barium result | A nucleus stretching, pinching and splitting, on a loop |
 | 04 | Only 0.72% of it is usable | A thousand atoms drifting; seven are U-235 |
 | 05 | Separating it at Oak Ridge | A separation hall running out past the fog |
-| 06 | The same machine makes both | The assay scale climbing through the 20 % line |
+| 06 | The same machine makes both | The assay scale climbing through the 20% line |
 | — | The simulation | Stage 01 of the simulation, already on screen |
 | — | Sources | The annotated bibliography |
 
@@ -39,25 +39,25 @@ The argument the whole thing is built around: **U-235 and U-238 are chemically i
 
 ### The assay ladder
 
-The log-scaled axis on the right of the canvas is present on every stage and never moves. It marks 0.25 % tails, 0.72 % natural, 5 % reactor fuel, the 20 % IAEA HEU line, and 90 % weapons-grade. Everything else in the simulation is downstream of where that marker sits.
+The log-scaled axis on the right of the canvas is present on every stage and never moves. It marks 0.25% tails, 0.72% natural, 5% reactor fuel, the 20% IAEA HEU line, and 90% weapons-grade. Everything else in the simulation is downstream of where that marker sits.
 
-Cross the 20 % line and the interface turns vermilion. That color appears nowhere else.
+Cross the 20% line and the interface turns vermilion. That color appears nowhere else.
 
 ### The two interactive stages
 
-**Stage 04** sets the target assay. The readout gives feed, tails and separative work per kilogram of product, and the cascade behind the rotor lights in proportion to the work required. Raising the target from 4.5 % to 60 % lights most of the hall; the last stretch to 90 % adds comparatively little. That asymmetry is the reason enrichment ceilings sit where they do in negotiated agreements.
+**Stage 04** sets the target assay. The readout gives feed, tails and separative work per kilogram of product, and the cascade behind the rotor lights in proportion to the work required. Raising the target from 4.5% to 60% lights most of the hall; the last stretch to 90% adds comparatively little. That asymmetry is the reason enrichment ceilings sit where they do in negotiated agreements.
 
-**Stage 06** builds a nucleus lattice at whatever assay stage 04 left behind, then induces one fission at the center. At 0.72 % the released neutrons are captured by U-238 and the chain dies in a generation or two. At 90 % nearly every neutron finds another U-235. Same lattice, same rules, one variable.
+**Stage 06** builds a nucleus lattice at whatever assay stage 04 left behind, then induces one fission at the center. At 0.72% the released neutrons are captured by U-238 and the chain dies in a generation or two. At 90% nearly every neutron finds another U-235. Same lattice, same rules, one variable.
 
 ## What is modeled and what is not
 
 Worth being explicit about, because this is a teaching aid.
 
-- **Real.** The separative work function `V(x) = (2x − 1)·ln(x/(1 − x))` and the feed/tails mass balance, in `src/lib/separation.ts`. At 4.5 % product with 0.25 % tails it returns ~6.9 SWU and ~9.2 kg feed per kg product, matching published tables. The Graham's law separation factor of 1.0043 is computed from real UF₆ molar masses.
+- **Real.** The separative work function `V(x) = (2x − 1)·ln(x/(1 − x))` and the feed/tails mass balance, in `src/lib/separation.ts`. At 4.5% product with 0.25% tails it returns ~6.9 SWU and ~9.2 kg feed per kg product, matching published tables. The Graham's law separation factor of 1.0043 is computed from real UF₆ molar masses.
 - **Directionally real, magnitude exaggerated.** Centrifuge separation. Heavy really does go to the wall and light really does concentrate toward the axis, with a counter-current between the ends, but a single machine shifts the assay by a fraction of a percent, which would be invisible. The honest numbers are in the readout.
 - **Illustrative only.** The chain reaction models branching and nothing else. No cross-sections, no moderation, no geometry, no delayed neutrons. It shows the logic that enrichment controls, not a neutronics result. The neutron interaction radius is a tuned visualisation parameter, not a cross-section: it applies to both isotopes identically, so it cannot tilt the outcome toward either, and it exists because in a lattice only 7 sites across, neutrons threading between sites and leaking out was drowning the assay signal the scene is built to show.
 - **Adaptive.** `src/three/AdaptiveQuality.tsx` samples real frame times and moves the renderer between three tiers, dropping pixel ratio first and then bloom. It reads a rolling median rather than a mean, uses a wide dead band between the step-down and step-up thresholds, and requires a long run of good frames before recovering, so the tier cannot flicker.
-- **Assay basis.** 0.72% is the atom-percent figure. On a mass basis natural uranium is 0.711 %, which is what SWU tables conventionally use, so the effort figures here run a few percent low against published values.
+- **Assay basis.** 0.72% is the atom-percent figure. On a mass basis natural uranium is 0.711%, which is what SWU tables conventionally use, so the effort figures here run a few percent low against published values.
 
 ## Stack
 
